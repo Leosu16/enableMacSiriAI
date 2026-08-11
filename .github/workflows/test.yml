@@ -1,0 +1,18 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  enableMacSiriAI:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: bash -n enableMacSiriAI tests/run.sh
+      - name: Run fixture tests
+        run: ./tests/run.sh

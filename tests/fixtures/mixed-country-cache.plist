@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>$archiver</key>
+  <string>NSKeyedArchiver</string>
+  <key>$objects</key>
+  <array>
+    <string>$null</string>
+    <dict>
+      <key>LocalCountryEstimatesLocation</key><dict><key>CF$UID</key><integer>2</integer></dict>
+      <key>LocalCountryEstimatesGeoIP</key><dict><key>CF$UID</key><integer>6</integer></dict>
+      <key>LocalCountryEstimatesWiFiAPs</key><dict><key>CF$UID</key><integer>10</integer></dict>
+      <key>CombinedEstimate</key><dict><key>CF$UID</key><integer>14</integer></dict>
+      <key>LastKnownCombinedEstimate</key><dict><key>CF$UID</key><integer>18</integer></dict>
+      <key>UnrelatedString</key><dict><key>CF$UID</key><integer>5</integer></dict>
+    </dict>
+    <dict><key>NS.objects</key><array><dict><key>CF$UID</key><integer>3</integer></dict></array></dict>
+    <dict><key>CountryCode</key><dict><key>CF$UID</key><integer>4</integer></dict><key>Priority</key><integer>4</integer></dict>
+    <string>CN</string>
+    <string>ZZ</string>
+    <dict><key>NS.objects</key><array><dict><key>CF$UID</key><integer>7</integer></dict></array></dict>
+    <dict><key>CountryCode</key><dict><key>CF$UID</key><integer>8</integer></dict><key>Priority</key><integer>5</integer></dict>
+    <string>CA</string>
+    <date>2026-08-11T00:00:00Z</date>
+    <dict><key>NS.objects</key><array><dict><key>CF$UID</key><integer>11</integer></dict></array></dict>
+    <dict><key>CountryCode</key><dict><key>CF$UID</key><integer>12</integer></dict><key>Priority</key><integer>1</integer></dict>
+    <string>CN</string>
+    <string>DO-NOT-CHANGE</string>
+    <dict><key>NS.objects</key><array><dict><key>CF$UID</key><integer>15</integer></dict></array></dict>
+    <dict><key>CountryCode</key><dict><key>CF$UID</key><integer>16</integer></dict><key>Priority</key><integer>4</integer></dict>
+    <string>CA</string>
+    <integer>27</integer>
+    <dict><key>NS.objects</key><array><dict><key>CF$UID</key><integer>19</integer></dict></array></dict>
+    <dict><key>CountryCode</key><dict><key>CF$UID</key><integer>20</integer></dict><key>Priority</key><integer>4</integer></dict>
+    <string>CN</string>
+  </array>
+  <key>$top</key>
+  <dict><key>root</key><dict><key>CF$UID</key><integer>1</integer></dict></dict>
+  <key>$version</key>
+  <integer>100000</integer>
+</dict>
+</plist>

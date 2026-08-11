@@ -1,0 +1,755 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# enableMacSiriAI - Safely inspect and manage countryd's country-code cache.
+# macOS 27 / Apple Silicon / non-China-mainland hardware only.
+
+set -u
+set -o pipefail
+
+PROGRAM="enableMacSiriAI"
+VERSION="0.1.3"
+PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
+PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
+PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
+ELIGIBILITY_PLIST="/private/var/db/eligibilityd/eligibility.plist"
+ALLOWED_COUNTRIES="US CA GB AU JP SG"
+
+TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
+if [ "$TEST_MODE" = "1" ]; then
+    TARGET="${ENABLE_MAC_SIRI_AI_TARGET:-}"
+    NEW_STATE_DIR="${ENABLE_MAC_SIRI_AI_STATE_DIR:-}"
+    LEGACY_STATE_DIR="${ENABLE_MAC_SIRI_AI_LEGACY_STATE_DIR:-/tmp/enableMacSiriAI-legacy-unused}"
+    case "$TARGET" in /tmp/*) ;; *) printf '%s\n' "Test target must be under /tmp." >&2; exit 70 ;; esac
+    case "$NEW_STATE_DIR" in /tmp/*) ;; *) printf '%s\n' "Test state directory must be under /tmp." >&2; exit 70 ;; esac
+    case "$LEGACY_STATE_DIR" in /tmp/*) ;; *) printf '%s\n' "Test legacy state directory must be under /tmp." >&2; exit 70 ;; esac
+else
+    TARGET="$PRODUCTION_TARGET"
+    NEW_STATE_DIR="$PRODUCTION_STATE_DIR"
+    LEGACY_STATE_DIR="$PRODUCTION_LEGACY_STATE_DIR"
+fi
+
+set_state_dir() {
+    STATE_DIR="$1"
+    ORIGINAL="$STATE_DIR/original.plist"
+    METADATA="$STATE_DIR/metadata"
+}
+
+if [ -d "$NEW_STATE_DIR" ]; then
+    set_state_dir "$NEW_STATE_DIR"
+elif [ -d "$LEGACY_STATE_DIR" ]; then
+    set_state_dir "$LEGACY_STATE_DIR"
+else
+    set_state_dir "$NEW_STATE_DIR"
+fi
+SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P)"
+SELF="$SELF_DIR/$(basename -- "$0")"
+
+info() { printf 'i  %s\n' "$*"; }
+ok() { printf 'OK %s\n' "$*"; }
+warn() { printf '!  %s\n' "$*" >&2; }
+error() { printf 'ERROR: %s\n' "$*" >&2; }
+die() { error "$*"; exit 1; }
+
+usage() {
+    cat <<'EOF'
+enableMacSiriAI - countryd country-code cache manager
+enableMacSiriAI - countryd 国家码缓存管理工具
+
+Usage / 用法:
+  enableMacSiriAI                  Interactive menu / 交互式菜单
+  enableMacSiriAI status           Inspect without administrator access / 查看状态，无需管理员权限
+  enableMacSiriAI set CODE         Set and lock: US CA GB AU JP SG / 设置并锁定
+  enableMacSiriAI unlock           Remove the uchg lock only / 仅解除 uchg 锁
+  enableMacSiriAI restore          Restore and keep the backup / 恢复并保留备份
+  enableMacSiriAI restore --delete-backup
+                              Restore, then delete the backup / 恢复成功后删除备份
+  enableMacSiriAI help             Show this help / 显示帮助
+
+This tool is only for macOS 27 on Apple Silicon Macs purchased outside
+China mainland. It does not change SIP, NVRAM, AMFI, device region-info,
+eligibility.plist, or install background services.
+
+本工具仅适用于 macOS 27、Apple Silicon、非中国大陆销售的 Mac。
+它不会修改 SIP、NVRAM、AMFI、设备 region-info、eligibility.plist，
+也不会安装后台服务。
+EOF
+}
+
+is_allowed_country() {
+    case " $ALLOWED_COUNTRIES " in *" $1 "*) return 0 ;; *) return 1 ;; esac
+}
+
+os_version() {
+    if [ "$TEST_MODE" = "1" ] && [ -n "${ENABLE_MAC_SIRI_AI_OS_VERSION:-}" ]; then
+        printf '%s\n' "$ENABLE_MAC_SIRI_AI_OS_VERSION"
+    else
+        /usr/bin/sw_vers -productVersion 2>/dev/null || printf '%s\n' "unknown"
+    fi
+}
+
+machine_arch() {
+    if [ "$TEST_MODE" = "1" ] && [ -n "${ENABLE_MAC_SIRI_AI_ARCH:-}" ]; then
+        printf '%s\n' "$ENABLE_MAC_SIRI_AI_ARCH"
+    else
+        /usr/bin/uname -m 2>/dev/null || printf '%s\n' "unknown"
+    fi
+}
+
+sip_status() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "enabled (test)"
+    else
+        /usr/bin/csrutil status 2>/dev/null | sed 's/^System Integrity Protection status: //' || printf '%s\n' "unknown"
+    fi
+}
+
+device_region() {
+    if [ "$TEST_MODE" = "1" ] && [ -n "${ENABLE_MAC_SIRI_AI_REGION:-}" ]; then
+        printf '%s\n' "$ENABLE_MAC_SIRI_AI_REGION"
+        return 0
+    fi
+
+    local plist raw decoded
+    plist="$(/usr/sbin/ioreg -ard1 -c IOPlatformExpertDevice 2>/dev/null)" || return 1
+    [ -n "$plist" ] || return 1
+    raw="$(printf '%s' "$plist" | /usr/bin/plutil -extract '0.region-info' raw - 2>/dev/null)" || return 1
+    [ -n "$raw" ] || return 1
+
+    decoded="$(printf '%s' "$raw" | /usr/bin/base64 -D 2>/dev/null | /usr/bin/tr -d '\000')"
+    if [ -n "$decoded" ]; then
+        printf '%s\n' "$decoded"
+    else
+        printf '%s\n' "$raw"
+    fi
+}
+
+file_flags() {
+    /usr/bin/stat -f '%Sf' "$1" 2>/dev/null
+}
+
+has_uchg() {
+    local flags
+    flags="$(file_flags "$1")" || return 1
+    case ",$flags," in *,uchg,*|*uchg*) return 0 ;; *) return 1 ;; esac
+}
+
+sha256_file() {
+    /usr/bin/shasum -a 256 "$1" 2>/dev/null | /usr/bin/awk '{print $1}'
+}
+
+make_xml_copy() {
+    local source="$1" output="$2"
+    /usr/bin/plutil -lint "$source" >/dev/null 2>&1 || return 1
+    /usr/bin/plutil -convert xml1 -o "$output" "$source" >/dev/null 2>&1 || return 1
+    /usr/bin/grep -q '<string>NSKeyedArchiver</string>' "$output" || return 1
+    /usr/bin/grep -q '<key>\$objects</key>' "$output" || return 1
+}
+
+# Print every object UID referenced by a CountryCode field in the archive.
+country_uids_from_xml() {
+    /usr/bin/awk '
+        /<key>CountryCode<\/key>/ { state=1; next }
+        state==1 && /<key>CF\$UID<\/key>/ { state=2; next }
+        state==2 && /<integer>[0-9]+<\/integer>/ {
+            value=$0
+            sub(/^.*<integer>/, "", value)
+            sub(/<\/integer>.*$/, "", value)
+            print value
+            state=0
+            next
+        }
+        state>0 && /<key>/ { state=0 }
+    ' "$1" | /usr/bin/awk '!seen[$0]++'
+}
+
+uid_from_fragment() {
+    /usr/bin/awk '
+        /<key>CF\$UID<\/key>/ { found=1; next }
+        found && /<integer>[0-9]+<\/integer>/ {
+            value=$0
+            sub(/^.*<integer>/, "", value)
+            sub(/<\/integer>.*$/, "", value)
+            print value
+            exit
+        }
+    '
+}
+
+uids_from_fragment() {
+    /usr/bin/awk '
+        /<key>CF\$UID<\/key>/ { found=1; next }
+        found && /<integer>[0-9]+<\/integer>/ {
+            value=$0
+            sub(/^.*<integer>/, "", value)
+            sub(/<\/integer>.*$/, "", value)
+            print value
+            found=0
+        }
+    ' | /usr/bin/awk '!seen[$0]++'
+}
+
+estimate_uids_from_object() {
+    /usr/bin/awk '
+        /<key>NS\.objects<\/key>/ { pending=1; next }
+        pending && /<array>/ { active=1; depth=1; pending=0; next }
+        active {
+            if (/<array>/) depth++
+            if (/<key>CF\$UID<\/key>/) found=1
+            else if (found && /<integer>[0-9]+<\/integer>/) {
+                value=$0
+                sub(/^.*<integer>/, "", value)
+                sub(/<\/integer>.*$/, "", value)
+                print value
+                found=0
+            }
+            if (/<\/array>/) {
+                depth--
+                if (depth==0) exit
+            }
+        }
+    ' | /usr/bin/awk '!seen[$0]++'
+}
+
+# Replace only direct string elements at selected indexes in the $objects array.
+# plutil -replace is intentionally not used here: some macOS 27 builds insert
+# at numerical array key paths and shift later NSKeyedArchiver object indexes.
+rewrite_object_strings() {
+    local input="$1" output="$2" indexes="$3" country="$4"
+    /usr/bin/awk -v selected="$indexes" -v replacement="$country" '
+        BEGIN {
+            count=split(selected, ids, /[[:space:]]+/)
+            for (i=1; i<=count; i++) {
+                if (ids[i] != "" && !wanted[ids[i]]) {
+                    wanted[ids[i]]=1
+                    wanted_count++
+                }
+            }
+        }
+        /<key>\$objects<\/key>/ { waiting=1; print; next }
+        waiting && /<array>/ { in_objects=1; waiting=0; depth=0; obj_index=0; print; next }
+        in_objects {
+            if (depth==0 && /<\/array>/) { in_objects=0; print; next }
+
+            if (depth==0) {
+                if ($0 ~ /^[[:space:]]*<string>[^<]*<\/string>[[:space:]]*$/) {
+                    if (wanted[obj_index]) {
+                        indent=$0
+                        sub(/[^[:space:]].*$/, "", indent)
+                        print indent "<string>" replacement "</string>"
+                        if (!changed[obj_index]) {
+                            changed[obj_index]=1
+                            changed_count++
+                        }
+                    } else print
+                    obj_index++
+                    next
+                }
+                if ($0 ~ /^[[:space:]]*<(date|integer|real|data)>/ ||
+                    $0 ~ /^[[:space:]]*<(true|false)\/>/) {
+                    print
+                    obj_index++
+                    next
+                }
+                if ($0 ~ /^[[:space:]]*<(dict|array)>/) obj_index++
+            }
+
+            print
+            opens=gsub(/<(dict|array)>/, "&")
+            closes=gsub(/<\/(dict|array)>/, "&")
+            depth += opens - closes
+            next
+        }
+        { print }
+        END {
+            if (changed_count != wanted_count) exit 42
+        }
+    ' "$input" > "$output"
+}
+
+uid_at_keypath() {
+    /usr/bin/plutil -extract "$2" xml1 -o - "$1" 2>/dev/null | uid_from_fragment
+}
+
+object_value() {
+    local file="$1" uid="$2" keypath type value
+    keypath="\$objects.$uid"
+    type="$(/usr/bin/plutil -type "$keypath" "$file" 2>/dev/null)" || return 1
+    [ "$type" = "string" ] || return 1
+    value="$(/usr/bin/plutil -extract "$keypath" raw "$file" 2>/dev/null)" || return 1
+    case "$value" in [A-Z][A-Z]) printf '%s\n' "$value" ;; *) return 1 ;; esac
+}
+
+validate_archive() {
+    local file="$1" work xml uids uid count=0
+    work="$(/usr/bin/mktemp -d /tmp/enableMacSiriAI-validate.XXXXXX)" || return 1
+    xml="$work/cache.xml"
+    if ! make_xml_copy "$file" "$xml"; then
+        /bin/rm -rf "$work"
+        return 1
+    fi
+    uids="$(country_uids_from_xml "$xml")"
+    if [ -z "$uids" ]; then
+        /bin/rm -rf "$work"
+        return 1
+    fi
+    while IFS= read -r uid; do
+        [ -n "$uid" ] || continue
+        object_value "$file" "$uid" >/dev/null || { /bin/rm -rf "$work"; return 1; }
+        count=$((count + 1))
+    done <<EOF
+$uids
+EOF
+    /bin/rm -rf "$work"
+    [ "$count" -gt 0 ]
+}
+
+all_country_codes() {
+    local file="$1" work xml uids uid
+    work="$(/usr/bin/mktemp -d /tmp/enableMacSiriAI-read.XXXXXX)" || return 1
+    xml="$work/cache.xml"
+    if ! make_xml_copy "$file" "$xml"; then
+        /bin/rm -rf "$work"
+        return 1
+    fi
+    uids="$(country_uids_from_xml "$xml")"
+    [ -n "$uids" ] || { /bin/rm -rf "$work"; return 1; }
+    while IFS= read -r uid; do
+        [ -n "$uid" ] || continue
+        object_value "$file" "$uid" || { /bin/rm -rf "$work"; return 1; }
+    done <<EOF
+$uids
+EOF
+    /bin/rm -rf "$work"
+}
+
+source_codes() {
+    local file="$1" source="$2" root_uid source_uid object_path estimate_uids estimate_uid country_uid value values=""
+    root_uid="$(uid_at_keypath "$file" '$top.root')" || return 1
+    [ -n "$root_uid" ] || return 1
+    source_uid="$(uid_at_keypath "$file" "\$objects.$root_uid.$source")" || return 1
+    [ -n "$source_uid" ] || return 1
+    object_path="\$objects.$source_uid"
+    estimate_uids="$(/usr/bin/plutil -extract "$object_path" xml1 -o - "$file" 2>/dev/null | estimate_uids_from_object)" || return 1
+    [ -n "$estimate_uids" ] || return 1
+
+    while IFS= read -r estimate_uid; do
+        [ -n "$estimate_uid" ] || continue
+        country_uid="$(uid_at_keypath "$file" "\$objects.$estimate_uid.CountryCode")" || return 1
+        value="$(object_value "$file" "$country_uid")" || return 1
+        if [ -z "$values" ]; then values="$value"; else values="$values,$value"; fi
+    done <<EOF
+$estimate_uids
+EOF
+    printf '%s\n' "$values"
+}
+
+metadata_value() {
+    local key="$1"
+    /usr/bin/awk -F= -v wanted="$key" '$1==wanted {print substr($0, index($0,"=")+1); exit}' "$METADATA" 2>/dev/null
+}
+
+state_is_valid() {
+    local expected actual uid gid mode state_uid state_mode original_uid original_mode metadata_uid metadata_mode
+    [ -d "$STATE_DIR" ] && [ -f "$ORIGINAL" ] && [ -f "$METADATA" ] || return 1
+    [ ! -L "$STATE_DIR" ] && [ ! -L "$ORIGINAL" ] && [ ! -L "$METADATA" ] || return 1
+    state_uid="$(/usr/bin/stat -f '%u' "$STATE_DIR" 2>/dev/null)" || return 1
+    state_mode="$(/usr/bin/stat -f '%Lp' "$STATE_DIR" 2>/dev/null)" || return 1
+    original_uid="$(/usr/bin/stat -f '%u' "$ORIGINAL" 2>/dev/null)" || return 1
+    original_mode="$(/usr/bin/stat -f '%Lp' "$ORIGINAL" 2>/dev/null)" || return 1
+    metadata_uid="$(/usr/bin/stat -f '%u' "$METADATA" 2>/dev/null)" || return 1
+    metadata_mode="$(/usr/bin/stat -f '%Lp' "$METADATA" 2>/dev/null)" || return 1
+    if [ "$TEST_MODE" = "1" ]; then
+        [ "$state_uid" = "$(/usr/bin/id -u)" ] || return 1
+    else
+        [ "$state_uid" = "0" ] && [ "$original_uid" = "0" ] && [ "$metadata_uid" = "0" ] || return 1
+    fi
+    [ "$state_mode" = "700" ] && [ "$original_mode" = "400" ] && [ "$metadata_mode" = "400" ] || return 1
+    validate_archive "$ORIGINAL" || return 1
+    uid="$(metadata_value uid)"; gid="$(metadata_value gid)"; mode="$(metadata_value mode)"; expected="$(metadata_value sha256)"
+    case "$uid:$gid:$mode" in *[!0-9:]*|::*|:*:) return 1 ;; esac
+    printf '%s\n' "$expected" | /usr/bin/grep -Eq '^[0-9a-f]{64}$' || return 1
+    actual="$(sha256_file "$ORIGINAL")" || return 1
+    [ "$actual" = "$expected" ]
+}
+
+migrate_legacy_state_if_needed() {
+    [ "$STATE_DIR" = "$LEGACY_STATE_DIR" ] || return 0
+    state_is_valid || die "Legacy backup state is invalid; refusing to migrate it. / 旧版备份状态无效，拒绝迁移。"
+    [ ! -e "$NEW_STATE_DIR" ] || die "Both old and new backup directories exist; refusing automatic migration. / 新旧备份目录同时存在，拒绝自动迁移。"
+    /bin/mv "$LEGACY_STATE_DIR" "$NEW_STATE_DIR" || die "Cannot migrate the legacy backup directory. / 无法迁移旧版备份目录。"
+    set_state_dir "$NEW_STATE_DIR"
+    state_is_valid || die "Migrated backup failed verification. / 迁移后的备份校验失败。"
+    ok "Migrated the legacy backup to ${NEW_STATE_DIR}. / 已将旧版备份迁移到 ${NEW_STATE_DIR}。"
+}
+
+create_original_backup() {
+    [ ! -e "$STATE_DIR" ] || { state_is_valid || die "Backup state exists but is incomplete or invalid. / 备份状态存在但不完整或无效。"; return 0; }
+
+    local parent base staging uid gid mode checksum
+    parent="$(dirname "$STATE_DIR")"
+    base="$(basename "$STATE_DIR")"
+    staging="$(/usr/bin/mktemp -d "$parent/.$base.XXXXXX")" || die "Cannot create backup staging directory. / 无法创建备份暂存目录。"
+    /bin/chmod 0700 "$staging" || { /bin/rm -rf "$staging"; die "Cannot secure backup directory. / 无法保护备份目录。"; }
+    if [ "$TEST_MODE" != "1" ]; then /usr/sbin/chown 0:0 "$staging" || { /bin/rm -rf "$staging"; die "Cannot own backup directory as root. / 无法设置备份目录所有者。"; }; fi
+
+    uid="$(/usr/bin/stat -f '%u' "$TARGET")" || die "Cannot read file owner. / 无法读取文件所有者。"
+    gid="$(/usr/bin/stat -f '%g' "$TARGET")" || die "Cannot read file group. / 无法读取文件所属组。"
+    mode="$(/usr/bin/stat -f '%Lp' "$TARGET")" || die "Cannot read file mode. / 无法读取文件权限。"
+    /bin/cp -p "$TARGET" "$staging/original.plist" || { /bin/rm -rf "$staging"; die "Cannot copy original cache. / 无法复制原始缓存。"; }
+    /bin/chmod 0400 "$staging/original.plist" || { /bin/rm -rf "$staging"; die "Cannot protect original backup. / 无法保护原始备份。"; }
+    checksum="$(sha256_file "$staging/original.plist")" || { /bin/rm -rf "$staging"; die "Cannot hash original backup. / 无法校验原始备份。"; }
+    umask 077
+    {
+        printf 'version=1\n'
+        printf 'uid=%s\n' "$uid"
+        printf 'gid=%s\n' "$gid"
+        printf 'mode=%s\n' "$mode"
+        printf 'had_uchg=0\n'
+        printf 'sha256=%s\n' "$checksum"
+    } > "$staging/metadata" || { /bin/rm -rf "$staging"; die "Cannot write backup metadata. / 无法写入备份元数据。"; }
+    /bin/chmod 0400 "$staging/metadata"
+    /bin/mv "$staging" "$STATE_DIR" || { /bin/rm -rf "$staging"; die "Cannot publish original backup. / 无法保存原始备份。"; }
+    ok "Saved the first original backup. / 已保存首次原始备份。"
+}
+
+preflight_platform() {
+    local version arch region
+    version="$(os_version)"; arch="$(machine_arch)"
+    case "$version" in 27|27.*) ;; *) die "Writes require macOS 27; detected ${version}. / 写入仅支持 macOS 27，当前为 ${version}。" ;; esac
+    [ "$arch" = "arm64" ] || die "Writes require Apple Silicon; detected ${arch}. / 写入仅支持 Apple Silicon，当前为 ${arch}。"
+    [ -f "$TARGET" ] || die "Cache not found: $TARGET / 未找到缓存文件。"
+    [ ! -L "$TARGET" ] || die "Refusing to operate on a symbolic-link cache. / 拒绝操作符号链接缓存。"
+    region="$(device_region 2>/dev/null)" || die "Cannot read device region-info; refusing to write. / 无法读取设备 region-info，拒绝写入。"
+    case "$region" in CH/A|CH/*) die "China-mainland hardware (${region}) is not supported. / 本工具不支持国行设备（${region}）。" ;; esac
+}
+
+preflight_mutation() {
+    preflight_platform
+    validate_archive "$TARGET" || die "Unsupported or damaged countryd archive; nothing changed. / countryd 归档损坏或结构不受支持，未做修改。"
+}
+
+require_root() {
+    if [ "$TEST_MODE" = "1" ] && [ "${ENABLE_MAC_SIRI_AI_SKIP_SUDO:-0}" = "1" ]; then return 0; fi
+    if [ "$(/usr/bin/id -u)" -ne 0 ]; then
+        info "Administrator access is required for this operation. / 此操作需要管理员权限。"
+        exec /usr/bin/sudo -- "$SELF" "$@"
+    fi
+}
+
+refresh_services() {
+    if [ "$TEST_MODE" = "1" ] && [ "${ENABLE_MAC_SIRI_AI_SKIP_REFRESH:-0}" = "1" ]; then
+        info "Service refresh skipped in test mode. / 测试模式已跳过服务刷新。"
+        return 0
+    fi
+    if /usr/bin/csrutil status 2>/dev/null | /usr/bin/grep -qi 'enabled'; then
+        warn "SIP protects countryd and eligibilityd from manual restart. / SIP 会阻止手动重启 countryd 和 eligibilityd。"
+        warn "Restart the Mac to load the new cache. / 请重启 Mac 以载入新的缓存。"
+        return 0
+    fi
+
+    local failed=0 service
+    for service in countryd eligibilityd; do
+        if /bin/launchctl kickstart -k "system/com.apple.$service" >/dev/null 2>&1; then
+            ok "Refreshed ${service}. / 已刷新 ${service}。"
+        else
+            failed=1
+            warn "Could not refresh ${service}. / 无法刷新 ${service}。"
+        fi
+    done
+    if [ "$failed" -ne 0 ]; then
+        warn "Restart the Mac before judging the result. / 请重启 Mac 后再判断结果。"
+        return 1
+    fi
+}
+
+file_country_matches() {
+    local file="$1" expected="$2" codes code count=0
+    codes="$(all_country_codes "$file")" || return 1
+    while IFS= read -r code; do
+        [ -n "$code" ] || continue
+        [ "$code" = "$expected" ] || return 1
+        count=$((count + 1))
+    done <<EOF
+$codes
+EOF
+    [ "$count" -gt 0 ]
+}
+
+verify_target_country() {
+    file_country_matches "$TARGET" "$1" && has_uchg "$TARGET"
+}
+
+replace_country() {
+    local country="$1" target_dir work xml rewritten uids uid rollback was_locked=0 uid_owner gid_owner original_mode readonly_mode
+    target_dir="$(dirname "$TARGET")"
+    work="$(/usr/bin/mktemp "$target_dir/.enableMacSiriAI-new.XXXXXX")" || die "Cannot create same-volume temporary file. / 无法创建同卷临时文件。"
+    rollback="$(/usr/bin/mktemp "$target_dir/.enableMacSiriAI-rollback.XXXXXX")" || { /bin/rm -f "$work"; die "Cannot create rollback file. / 无法创建回滚文件。"; }
+    /bin/rm -f "$work" "$rollback"
+    /bin/cp -p "$TARGET" "$work" || { /bin/rm -f "$work" "$rollback"; die "Cannot stage cache. / 无法暂存缓存。"; }
+    /usr/bin/chflags nouchg "$work" 2>/dev/null || true
+    /bin/chmod u+w "$work" || { /bin/rm -f "$work" "$rollback"; die "Cannot make staging file writable. / 无法写入暂存文件。"; }
+
+    xml="$(/usr/bin/mktemp /tmp/enableMacSiriAI-write.XXXXXX)" || { /bin/rm -f "$work" "$rollback"; die "Cannot create parser temporary file. / 无法创建解析临时文件。"; }
+    make_xml_copy "$work" "$xml" || { /bin/rm -f "$work" "$rollback" "$xml"; die "Unsupported archive; nothing changed. / 归档结构不受支持，未做修改。"; }
+    uids="$(country_uids_from_xml "$xml")"
+    /bin/rm -f "$xml"
+    [ -n "$uids" ] || { /bin/rm -f "$work" "$rollback"; die "No CountryCode references found. / 未找到 CountryCode 引用。"; }
+
+    while IFS= read -r uid; do
+        [ -n "$uid" ] || continue
+        object_value "$work" "$uid" >/dev/null || { /bin/rm -f "$work" "$rollback"; die "Invalid CountryCode object UID $uid. / CountryCode 对象 UID $uid 无效。"; }
+    done <<EOF
+$uids
+EOF
+
+    /usr/bin/plutil -convert xml1 "$work" >/dev/null 2>&1 || { /bin/rm -f "$work" "$rollback"; die "Cannot convert staged cache to XML. / 无法将暂存缓存转换为 XML。"; }
+    rewritten="$(/usr/bin/mktemp "$target_dir/.enableMacSiriAI-xml.XXXXXX")" || { /bin/rm -f "$work" "$rollback"; die "Cannot create XML staging file. / 无法创建 XML 暂存文件。"; }
+    if ! rewrite_object_strings "$work" "$rewritten" "$(printf '%s' "$uids" | /usr/bin/tr '\n' ' ')" "$country"; then
+        /bin/rm -f "$work" "$rewritten" "$rollback"
+        die "Could not precisely rewrite CountryCode objects. / 无法精确改写 CountryCode 对象。"
+    fi
+    /bin/mv -f "$rewritten" "$work" || { /bin/rm -f "$work" "$rewritten" "$rollback"; die "Cannot install rewritten staging file. / 无法使用改写后的暂存文件。"; }
+    /usr/bin/plutil -convert binary1 "$work" >/dev/null 2>&1 || { /bin/rm -f "$work" "$rollback"; die "Cannot convert staged cache to binary plist. / 无法将暂存缓存转换为二进制 plist。"; }
+    /usr/bin/plutil -lint "$work" >/dev/null 2>&1 || { /bin/rm -f "$work" "$rollback"; die "Staged plist failed validation. / 暂存 plist 校验失败。"; }
+    validate_archive "$work" || { /bin/rm -f "$work" "$rollback"; die "Staged archive failed structural validation. / 暂存归档结构校验失败。"; }
+    file_country_matches "$work" "$country" || { /bin/rm -f "$work" "$rollback"; die "Staged country verification failed. / 暂存国家码校验失败。"; }
+
+    uid_owner="$(metadata_value uid)"; gid_owner="$(metadata_value gid)"; original_mode="$(metadata_value mode)"
+    case "$uid_owner:$gid_owner:$original_mode" in *[!0-9:]*|::*|:*:) /bin/rm -f "$work" "$rollback"; die "Invalid backup metadata. / 备份元数据无效。" ;; esac
+    readonly_mode=$((8#$original_mode & 0555))
+    [ "$readonly_mode" -ne 0 ] || readonly_mode=$((8#444))
+    readonly_mode="$(printf '%o' "$readonly_mode")"
+    /usr/sbin/chown "$uid_owner:$gid_owner" "$work" 2>/dev/null || { [ "$TEST_MODE" = "1" ] || { /bin/rm -f "$work" "$rollback"; die "Cannot restore cache ownership. / 无法恢复缓存所有者。"; }; }
+    /bin/chmod "$readonly_mode" "$work" || { /bin/rm -f "$work" "$rollback"; die "Cannot set read-only mode. / 无法设置只读权限。"; }
+
+    has_uchg "$TARGET" && was_locked=1
+    /bin/cp -p "$TARGET" "$rollback" || { /bin/rm -f "$work" "$rollback"; die "Cannot create rollback copy. / 无法创建回滚副本。"; }
+    /usr/bin/chflags nouchg "$rollback" 2>/dev/null || true
+    if [ "$was_locked" -eq 1 ]; then /usr/bin/chflags nouchg "$TARGET" || { /bin/rm -f "$work" "$rollback"; die "Cannot unlock managed cache. / 无法解锁已管理的缓存。"; }; fi
+
+    if ! /bin/mv -f "$work" "$TARGET"; then
+        [ "$was_locked" -eq 1 ] && /usr/bin/chflags uchg "$TARGET" 2>/dev/null || true
+        /bin/rm -f "$work" "$rollback"
+        die "Atomic replacement failed; previous cache retained. / 原子替换失败，已保留此前缓存。"
+    fi
+    if ! /usr/bin/chflags uchg "$TARGET"; then
+        /usr/bin/chflags nouchg "$TARGET" 2>/dev/null || true
+        /bin/mv -f "$rollback" "$TARGET" 2>/dev/null || true
+        [ "$was_locked" -eq 1 ] && /usr/bin/chflags uchg "$TARGET" 2>/dev/null || true
+        die "Locking failed; rolled back to the previous cache. / 锁定失败，已回滚到此前缓存。"
+    fi
+    /bin/rm -f "$rollback"
+    verify_target_country "$country" || die "Post-write verification failed. Restore is available. / 写后验证失败，可使用 restore 恢复。"
+    ok "All CountryCode references are ${country} and the cache is locked. / 所有 CountryCode 引用均为 ${country}，缓存已锁定。"
+}
+
+command_set() {
+    local country="${1:-}"
+    [ -n "$country" ] || die "Missing country code. Allowed: $ALLOWED_COUNTRIES / 缺少国家码。"
+    is_allowed_country "$country" || die "Unsupported country code: $country. Allowed: $ALLOWED_COUNTRIES / 不支持该国家码。"
+    preflight_mutation
+    migrate_legacy_state_if_needed
+    if has_uchg "$TARGET" && [ ! -d "$STATE_DIR" ]; then
+        die "The cache has an unknown external lock and no enableMacSiriAI backup; refusing to overwrite it. / 缓存存在未知外部锁且没有 enableMacSiriAI 备份，拒绝覆盖。"
+    fi
+    create_original_backup
+    state_is_valid || die "Original backup verification failed. / 原始备份验证失败。"
+    replace_country "$country"
+    refresh_services || true
+}
+
+command_unlock() {
+    preflight_mutation
+    migrate_legacy_state_if_needed
+    if has_uchg "$TARGET"; then
+        [ -d "$STATE_DIR" ] || die "Unknown external lock; refusing to remove it. / 检测到未知外部锁，拒绝解除。"
+        state_is_valid || die "Managed backup state is invalid; refusing to unlock. / 管理备份状态无效，拒绝解锁。"
+        /usr/bin/chflags nouchg "$TARGET" || die "Cannot remove uchg. / 无法移除 uchg。"
+        ok "Cache unlocked; contents were not changed. / 缓存已解锁，内容未修改。"
+    else
+        ok "Cache is already unlocked. / 缓存已经处于解锁状态。"
+    fi
+    refresh_services || true
+}
+
+delete_backup_state() {
+    state_is_valid || die "Backup state is invalid; refusing to delete it. / 备份状态无效，拒绝删除。"
+    has_uchg "$TARGET" && die "Cache is still locked; refusing to delete the backup. / 缓存仍处于锁定状态，拒绝删除备份。"
+
+    local expected current entries
+    expected="$(metadata_value sha256)"
+    current="$(sha256_file "$TARGET")" || die "Cannot verify the restored cache. / 无法校验恢复后的缓存。"
+    [ "$current" = "$expected" ] || die "Current cache does not match the original backup; refusing to delete it. / 当前缓存与原始备份不一致，拒绝删除。"
+
+    entries="$(/usr/bin/find "$STATE_DIR" -mindepth 1 -maxdepth 1 -print 2>/dev/null | /usr/bin/awk -F/ '{print $NF}' | /usr/bin/sort)"
+    [ "$entries" = "metadata
+original.plist" ] || die "Backup directory contains unexpected files; refusing to delete it. / 备份目录包含未知文件，拒绝删除。"
+
+    /bin/rm -f "$ORIGINAL" "$METADATA" || die "Cannot delete backup files. / 无法删除备份文件。"
+    /bin/rmdir "$STATE_DIR" || die "Cannot remove backup directory. / 无法删除备份目录。"
+    ok "Deleted the saved original backup. / 已删除保存的原始备份。"
+}
+
+command_restore() {
+    local delete_backup="${1:-0}"
+    preflight_platform
+    migrate_legacy_state_if_needed
+    state_is_valid || die "No valid original backup is available. / 没有可用的有效原始备份。"
+    local target_dir staged rollback uid gid mode checksum expected was_locked=0
+    target_dir="$(dirname "$TARGET")"
+    staged="$(/usr/bin/mktemp "$target_dir/.enableMacSiriAI-restore.XXXXXX")" || die "Cannot create restore staging file. / 无法创建恢复暂存文件。"
+    rollback="$(/usr/bin/mktemp "$target_dir/.enableMacSiriAI-restore-rollback.XXXXXX")" || { /bin/rm -f "$staged"; die "Cannot create restore rollback file. / 无法创建恢复回滚文件。"; }
+    /bin/rm -f "$staged" "$rollback"
+    /bin/cp -p "$ORIGINAL" "$staged" || { /bin/rm -f "$staged" "$rollback"; die "Cannot stage original backup. / 无法暂存原始备份。"; }
+    /usr/bin/chflags nouchg "$staged" 2>/dev/null || true
+    validate_archive "$staged" || { /bin/rm -f "$staged" "$rollback"; die "Original backup is no longer valid. / 原始备份不再有效。"; }
+    uid="$(metadata_value uid)"; gid="$(metadata_value gid)"; mode="$(metadata_value mode)"
+    /usr/sbin/chown "$uid:$gid" "$staged" 2>/dev/null || { [ "$TEST_MODE" = "1" ] || { /bin/rm -f "$staged" "$rollback"; die "Cannot restore original ownership. / 无法恢复原始所有者。"; }; }
+    /bin/chmod "$mode" "$staged" || { /bin/rm -f "$staged" "$rollback"; die "Cannot restore original mode. / 无法恢复原始权限。"; }
+    /bin/cp -p "$TARGET" "$rollback" || { /bin/rm -f "$staged" "$rollback"; die "Cannot create restore rollback copy. / 无法创建恢复回滚副本。"; }
+    /usr/bin/chflags nouchg "$rollback" 2>/dev/null || true
+    has_uchg "$TARGET" && was_locked=1
+    if [ "$was_locked" -eq 1 ]; then /usr/bin/chflags nouchg "$TARGET" || { /bin/rm -f "$staged" "$rollback"; die "Cannot unlock cache for restoration. / 无法解锁缓存以执行恢复。"; }; fi
+    if ! /bin/mv -f "$staged" "$TARGET"; then
+        [ "$was_locked" -eq 1 ] && /usr/bin/chflags uchg "$TARGET" 2>/dev/null || true
+        /bin/rm -f "$staged" "$rollback"
+        die "Atomic restore failed; previous cache retained. / 原子恢复失败，已保留此前缓存。"
+    fi
+    expected="$(metadata_value sha256)"; checksum="$(sha256_file "$TARGET")"
+    if [ "$checksum" != "$expected" ]; then
+        /bin/mv -f "$rollback" "$TARGET" 2>/dev/null || true
+        [ "$was_locked" -eq 1 ] && /usr/bin/chflags uchg "$TARGET" 2>/dev/null || true
+        die "Restored checksum mismatch; rolled back. / 恢复校验值不匹配，已回滚。"
+    fi
+    /bin/rm -f "$rollback"
+    ok "Restored the first original cache and left it unlocked. / 已恢复首次原始缓存并保持解锁。"
+    [ "$delete_backup" = "1" ] && delete_backup_state
+    refresh_services || true
+}
+
+print_source_status() {
+    local label="$1" key="$2" values
+    values="$(source_codes "$TARGET" "$key" 2>/dev/null)" || values="—"
+    printf '  %-24s %s\n' "$label" "$values"
+}
+
+eligibility_value() {
+    /usr/libexec/PlistBuddy -c "Print :OS_ELIGIBILITY_DOMAIN_GREYMATTER:$1" "$ELIGIBILITY_PLIST" 2>/dev/null || printf '%s\n' "—"
+}
+
+command_status() {
+    local version arch sip region flags owner mode backup codes answer location
+    version="$(os_version)"; arch="$(machine_arch)"; sip="$(sip_status)"
+    region="$(device_region 2>/dev/null)" || region="unavailable / 无法读取"
+    printf '%s %s\n' "$PROGRAM" "$VERSION"
+    printf '  macOS:                  %s\n' "$version"
+    printf '  Architecture / 架构:   %s\n' "$arch"
+    printf '  SIP:                    %s\n' "$sip"
+    printf '  Device region / 设备区域: %s\n' "$region"
+    printf '  Cache / 缓存:           %s\n' "$TARGET"
+
+    if [ ! -f "$TARGET" ]; then
+        printf '  Cache state / 缓存状态: missing / 不存在\n'
+    elif ! validate_archive "$TARGET"; then
+        printf '  Cache state / 缓存状态: unsupported or damaged / 不受支持或已损坏\n'
+    else
+        owner="$(/usr/bin/stat -f '%Su:%Sg' "$TARGET" 2>/dev/null || printf '%s' '—')"
+        mode="$(/usr/bin/stat -f '%Sp (%Lp)' "$TARGET" 2>/dev/null || printf '%s' '—')"
+        flags="$(file_flags "$TARGET" 2>/dev/null || printf '%s' '—')"
+        printf '  Owner / 所有者:         %s\n' "$owner"
+        printf '  Mode / 权限:            %s\n' "$mode"
+        printf '  Flags / 标志:           %s\n' "$flags"
+        if has_uchg "$TARGET"; then printf '  Lock / 锁定:            uchg (locked / 已锁定)\n'; else printf '  Lock / 锁定:            unlocked / 未锁定\n'; fi
+        printf '\nCountry sources / 国家码来源:\n'
+        print_source_status "Location / 定位" "LocalCountryEstimatesLocation"
+        print_source_status "GeoIP" "LocalCountryEstimatesGeoIP"
+        print_source_status "Wi-Fi" "LocalCountryEstimatesWiFiAPs"
+        print_source_status "Combined / 综合" "CombinedEstimate"
+        print_source_status "Last combined / 上次综合" "LastKnownCombinedEstimate"
+        codes="$(all_country_codes "$TARGET" 2>/dev/null | /usr/bin/awk '!seen[$0]++' | /usr/bin/paste -sd, -)"
+        printf '  %-24s %s\n' "All referenced / 全部引用" "${codes:-—}"
+    fi
+
+    if [ -d "$STATE_DIR" ]; then backup="present / 已保存"; else backup="absent / 未保存"; fi
+    printf '  Original backup / 原始备份: %s\n' "$backup"
+
+    if [ "$TEST_MODE" != "1" ] && [ -f "$ELIGIBILITY_PLIST" ]; then
+        answer="$(eligibility_value os_eligibility_answer_t)"
+        location="$(eligibility_value 'status:OS_ELIGIBILITY_INPUT_COUNTRY_LOCATION')"
+        printf '\nEligibility diagnostics / 资格诊断（只读）:\n'
+        printf '  GREYMATTER answer:      %s\n' "$answer"
+        printf '  COUNTRY_LOCATION input: %s\n' "$location"
+    fi
+}
+
+interactive_menu() {
+    local choice country
+    while :; do
+        printf '\n'
+        command_status
+        cat <<'EOF'
+
+Actions / 操作:
+  1) Set US / 设置 US
+  2) Set CA / 设置 CA
+  3) Set another preset / 设置其他预设（GB AU JP SG）
+  4) Unlock only / 仅解锁
+  5) Restore original / 恢复原始缓存
+  6) Refresh status / 刷新状态
+  0) Exit / 退出
+EOF
+        printf '> '
+        IFS= read -r choice || return 0
+        case "$choice" in
+            1) "$SELF" set US || warn "Set failed / 设置失败" ;;
+            2) "$SELF" set CA || warn "Set failed / 设置失败" ;;
+            3)
+                printf 'GB / AU / JP / SG > '
+                IFS= read -r country || return 0
+                is_allowed_country "$country" || { warn "Invalid preset / 预设无效"; continue; }
+                case "$country" in US|CA) warn "Use menu item 1 or 2. / 请使用菜单 1 或 2。"; continue ;; esac
+                "$SELF" set "$country" || warn "Set failed / 设置失败"
+                ;;
+            4) "$SELF" unlock || warn "Unlock failed / 解锁失败" ;;
+            5)
+                printf 'Type RESTORE or restore to confirm / 输入 RESTORE 或 restore 确认: '
+                IFS= read -r country || return 0
+                case "$country" in
+                    [Rr][Ee][Ss][Tt][Oo][Rr][Ee]) ;;
+                    *) info "Cancelled / 已取消"; continue ;;
+                esac
+                printf 'Delete the backup after a successful restore? [y/N] / 恢复成功后删除备份？[y/N]: '
+                IFS= read -r choice || return 0
+                case "$choice" in
+                    [Yy]|[Yy][Ee][Ss]) "$SELF" restore --delete-backup || warn "Restore failed / 恢复失败" ;;
+                    *) "$SELF" restore || warn "Restore failed / 恢复失败" ;;
+                esac
+                ;;
+            6) ;;
+            0) return 0 ;;
+            *) warn "Unknown choice / 未知选项" ;;
+        esac
+    done
+}
+
+command="${1:-menu}"
+case "$command" in
+    menu) interactive_menu ;;
+    help|-h|--help) usage ;;
+    status) [ "$#" -eq 1 ] || die "status takes no arguments. / status 不接受参数。"; command_status ;;
+    set) [ "$#" -eq 2 ] || die "Usage: enableMacSiriAI set CODE"; require_root "$@"; command_set "$2" ;;
+    unlock) [ "$#" -eq 1 ] || die "unlock takes no arguments. / unlock 不接受参数。"; require_root "$@"; command_unlock ;;
+    restore)
+        [ "$#" -le 2 ] || die "Usage: enableMacSiriAI restore [--delete-backup]"
+        delete_backup=0
+        if [ "$#" -eq 2 ]; then
+            [ "$2" = "--delete-backup" ] || die "Unknown restore option: $2 / 未知的恢复选项。"
+            delete_backup=1
+        fi
+        require_root "$@"
+        command_restore "$delete_backup"
+        ;;
+    version|--version) printf '%s %s\n' "$PROGRAM" "$VERSION" ;;
+    *) error "Unknown command: $command / 未知命令。"; usage >&2; exit 2 ;;
+esac
