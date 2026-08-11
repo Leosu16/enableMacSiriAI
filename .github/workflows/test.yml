@@ -11,7 +11,7 @@ jobs:
   enableMacSiriAI:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check shell syntax
         run: bash -n enableMacSiriAI tests/run.sh
       - name: Run fixture tests
