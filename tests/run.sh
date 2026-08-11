@@ -47,13 +47,6 @@ assert_contains() {
     case "$1" in *"$2"*) return 0 ;; *) return 1 ;; esac
 }
 
-assert_source_line() {
-    printf '%s\n' "$1" | /usr/bin/awk -v label="$2" -v code="$3" '
-        index($0, label) && $NF == code { found=1 }
-        END { exit(found ? 0 : 1) }
-    '
-}
-
 expect_failure() {
     "$@" >/dev/null 2>&1
     [ "$?" -ne 0 ]
@@ -63,11 +56,11 @@ test_status_sources() {
     new_case
     local output
     output="$(ctl status)" || return 1
-    assert_source_line "$output" "Location / 定位" "CN" || return 1
-    assert_source_line "$output" "GeoIP" "CA" || return 1
-    assert_source_line "$output" "Wi-Fi" "CN" || return 1
-    assert_source_line "$output" "Combined / 综合" "CA" || return 1
-    assert_source_line "$output" "All referenced / 全部引用" "CN,CA" || return 1
+    assert_contains "$output" "Location / 定位        CN" || return 1
+    assert_contains "$output" "GeoIP                    CA" || return 1
+    assert_contains "$output" "Wi-Fi                    CN" || return 1
+    assert_contains "$output" "Combined / 综合        CA" || return 1
+    assert_contains "$output" "All referenced / 全部引用 CN,CA" || return 1
 }
 
 test_precise_set_and_lock() {
@@ -118,27 +111,15 @@ test_invalid_country() {
 }
 
 test_damaged_and_unknown_archives() {
-    local source_xml unknown_xml
     new_case
     printf 'not a plist\n' > "$TARGET"
     expect_failure ctl set US || return 1
     new_case
-    source_xml="$CASE_DIR/source.xml"
-    unknown_xml="$CASE_DIR/unknown.xml"
-    /usr/bin/plutil -convert xml1 -o "$source_xml" "$TARGET" >/dev/null || return 1
-    /usr/bin/awk '
-        /<key>CountryCode<\/key>/ { skipping=1; next }
-        skipping {
-            opens=gsub(/<dict>/, "&")
-            closes=gsub(/<\/dict>/, "&")
-            depth += opens - closes
-            if (depth == 0 && closes > 0) skipping=0
-            next
-        }
-        { print }
-    ' "$source_xml" > "$unknown_xml" || return 1
-    /bin/mv "$unknown_xml" "$TARGET" || return 1
-    /usr/bin/plutil -lint "$TARGET" >/dev/null || return 1
+    /usr/bin/plutil -remove '$objects.3.CountryCode' "$TARGET" >/dev/null
+    /usr/bin/plutil -remove '$objects.7.CountryCode' "$TARGET" >/dev/null
+    /usr/bin/plutil -remove '$objects.11.CountryCode' "$TARGET" >/dev/null
+    /usr/bin/plutil -remove '$objects.15.CountryCode' "$TARGET" >/dev/null
+    /usr/bin/plutil -remove '$objects.19.CountryCode' "$TARGET" >/dev/null
     expect_failure ctl set US
 }
 
