@@ -70,18 +70,18 @@ sudo ./enableMacSiriAI restore
 
 仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置：
 
-当前分流资源版本：`0.1.9`（更新时间：`2026-08-13 00:31 UTC+8`）。下面三个链接均直接读取仓库 `main` 分支，提交更新后即可生效，无需另外上传 Release 附件。Loon 与 Shadowrocket 模块详情显示版本日期和最低系统版本 `27`，不声明支持的系统。
+当前分流资源版本：`0.2.0`（更新时间：`2026-08-13 00:42 UTC+8`）。下面三个链接均直接读取仓库 `main` 分支，提交更新后即可生效，无需另外上传 Release 附件。Loon 与 Shadowrocket 模块详情显示版本日期和最低系统版本 `27`，不声明支持的系统。
 
 - [最新版 Loon 插件（`.lpx`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [最新版 Shadowrocket 模块（`.srmodule`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [最新版 Clash/Mihomo 规则集（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule) · [Clash/Mihomo](Siri_AI_Clash.yaml)
 
-导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` Release 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` Release 地址。这些分流配置与国家码修改功能相互独立。
+导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址。这些分流配置与国家码修改功能相互独立。
 
 Clash/Mihomo 使用 `behavior: classical` 引用上述链接，并置顶 `RULE-SET`。
 
-如果 Siri AI 无法正常访问，可使用上述分流资源，或将代理切换为全局并开启 TUN 模式。如果使用 Clash，请将 TUN 模式堆栈改为 `system`。
+如果 Siri AI 无法正常访问，可使用上述分流资源，或将代理切换为全局并开启 TUN 模式。
 
 ## 注意事项
 

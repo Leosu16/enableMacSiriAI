@@ -70,18 +70,18 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 The repository also includes optional Siri AI and ChatGPT routing resources:
 
-Current routing resource version: `0.1.9` (updated `2026-08-13 00:31 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets. The Loon and Shadowrocket module details show the version date and minimum system version `27` without declaring supported systems.
+Current routing resource version: `0.2.0` (updated `2026-08-13 00:42 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets. The Loon and Shadowrocket module details show the version date and minimum system version `27` without declaring supported systems.
 
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule) · [Clash/Mihomo](Siri_AI_Clash.yaml)
 
-After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` Release URL. These routing configurations are independent of the country-code feature.
+After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL. These routing configurations are independent of the country-code feature.
 
 For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
 
-If Siri AI cannot access the network normally, use one of the routing resources above, or enable global proxy and TUN mode. When using Clash, set the TUN stack to `system`.
+If Siri AI cannot access the network normally, use one of the routing resources above, or enable global proxy and TUN mode.
 
 ## Important notes
 

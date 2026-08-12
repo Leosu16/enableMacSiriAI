@@ -111,7 +111,6 @@ test_diagnose_reports_leaking_siri_routes() {
     ! assert_contains "$output" "LEAK / 疑似漏代理" || return 1
     assert_contains "$output" "Siri AI may not be able to access the network normally" || return 1
     assert_contains "$output" "enable global proxy and TUN mode" || return 1
-    assert_contains "$output" "TUN stack to system" || return 1
     assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml" || return 1
     assert_contains "$output" "place RULE-SET first" || return 1
     assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx" || return 1
@@ -121,7 +120,7 @@ test_diagnose_reports_leaking_siri_routes() {
 test_modules_include_date_and_minimum_system_without_system_or_version() {
     local module
     for module in "$ROOT/Siri_AI_ChatGPT.lpx" "$ROOT/Siri_AI_ChatGPT.srmodule"; do
-        /usr/bin/grep -Eq '^#!date ?= ?2026-08-13 00:31 UTC\+8$' "$module" || return 1
+        /usr/bin/grep -Eq '^#!date ?= ?2026-08-13 00:42 UTC\+8$' "$module" || return 1
         /usr/bin/grep -Eq '^#!system_version ?= ?27$' "$module" || return 1
         if /usr/bin/grep -Eq '^#!system ?=' "$module"; then
             return 1
@@ -129,7 +128,7 @@ test_modules_include_date_and_minimum_system_without_system_or_version() {
         if /usr/bin/grep -Fq '最后更新时间' "$module"; then
             return 1
         fi
-        if /usr/bin/grep -Fq '版本 0.1.9' "$module"; then
+        if /usr/bin/grep -Eq '版本 0\.[0-9]+\.[0-9]+' "$module"; then
             return 1
         fi
         if /usr/bin/grep -Fq 'PROCESS-NAME,assistantd,PROXY' "$module"; then
@@ -143,7 +142,7 @@ test_clash_ruleset_is_classical_and_includes_assistantd() {
     /usr/bin/grep -Fq 'payload:' "$ruleset" || return 1
     /usr/bin/grep -Fq 'PROCESS-NAME,assistantd' "$ruleset" || return 1
     /usr/bin/grep -Fq 'DOMAIN-SUFFIX,pcc.apple.com' "$ruleset" || return 1
-    /usr/bin/grep -Fq 'Version 0.1.9 · Updated 2026-08-13 00:22 (UTC+8)' "$ruleset" || return 1
+    /usr/bin/grep -Fq 'Version 0.2.0 · Updated 2026-08-13 00:42 (UTC+8)' "$ruleset" || return 1
 }
 
 test_precise_set_and_lock() {
