@@ -70,7 +70,7 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 The repository also includes optional Siri AI and ChatGPT routing resources:
 
-Current routing resource version: `0.1.9` (updated `2026-08-13 00:22 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets.
+Current routing resource version: `0.1.9` (updated `2026-08-13 00:31 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets. The Loon and Shadowrocket module details show the version date and minimum system version `27` without declaring supported systems.
 
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
