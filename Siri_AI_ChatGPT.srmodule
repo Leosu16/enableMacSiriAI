@@ -1,5 +1,5 @@
 #!name=Siri AI & ChatGPT
-#!desc=Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；启用前请确认 Shadowrocket 配置包含 PROXY 策略。
+#!desc=版本 0.1.6 · 更新日期 2026-08-12；Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；启用前请确认 Shadowrocket 配置包含 PROXY 策略。
 #!system=ios
 #!homepage=https://github.com/Leosu16/enableMacSiriAI
 #!author=Leosu16

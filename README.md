@@ -70,6 +70,8 @@ sudo ./enableMacSiriAI restore
 
 仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置。下面两个链接会自动下载 GitHub Release 中的最新版本；地址始终不变，不要使用 GitHub 的 `blob` 页面链接：
 
+当前模块版本：`0.1.6`（更新日期：`2026-08-12`）。模块说明中也会显示版本号和更新日期，方便确认是否已更新。
+
 - [自动下载最新版 Loon 插件（`.lpx`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
 - [自动下载最新版 Shadowrocket 模块（`.srmodule`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
 - 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)

@@ -70,6 +70,8 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 The repository also includes optional Siri AI and ChatGPT routing configurations. The two links below automatically download the latest versions from GitHub Releases and never need to change. Do not use a GitHub `blob` page URL:
 
+Current module version: `0.1.6` (updated `2026-08-12`). The module description also shows its version and update date so users can confirm that it is current.
+
 - [Automatically download the latest Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
 - [Automatically download the latest Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
 - Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
