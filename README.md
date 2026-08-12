@@ -71,10 +71,10 @@ sudo ./enableMacSiriAI restore
 仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置。建议直接使用 Release 固定下载地址，不要使用 GitHub 的 `blob` 页面链接：
 
 - [下载 Loon 插件（`.lpx`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
-- [下载 Shadowrocket 模块（`.module`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.module)
-- 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.module)
+- [下载 Shadowrocket 模块（`.srmodule`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
+- 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
 
-导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` Release 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.module` Release 地址。这些分流配置与国家码修改功能相互独立。
+导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` Release 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` Release 地址。这些分流配置与国家码修改功能相互独立。
 
 ## 注意事项
 

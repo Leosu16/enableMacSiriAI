@@ -71,10 +71,10 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 The repository also includes optional Siri AI and ChatGPT routing configurations. Use the stable Release download URLs rather than a GitHub `blob` page URL:
 
 - [Download the Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
-- [Download the Shadowrocket module (`.module`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.module)
-- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.module)
+- [Download the Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
+- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
 
-After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.module` Release URL. These routing configurations are independent of the country-code feature.
+After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` Release URL. These routing configurations are independent of the country-code feature.
 
 ## Important notes
 
