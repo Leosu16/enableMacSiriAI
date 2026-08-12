@@ -5,7 +5,8 @@
 
 #  Siri / Apple Intelligence
 
-DOMAIN,seed.siri.apple.com,PROXY
+DOMAIN-SUFFIX,siri.apple.com,PROXY
+DOMAIN,ropes.apple.com,PROXY
 DOMAIN-SUFFIX,apple-intelligence.apple.com,PROXY
 DOMAIN-SUFFIX,ai.apple.com,PROXY
 DOMAIN-SUFFIX,guzzoni.apple.com,PROXY
@@ -17,6 +18,7 @@ DOMAIN-SUFFIX,gateway.icloud.com,PROXY
 #  Apple Intelligence / Private Cloud Compute
 
 DOMAIN-SUFFIX,pcc.apple.com,PROXY
+DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com,PROXY
 DOMAIN-SUFFIX,apple-relay.apple.com,PROXY
 DOMAIN-SUFFIX,apple-relay.cloudflare.com,PROXY
 DOMAIN-SUFFIX,apple-relay.fastly-edge.com,PROXY
