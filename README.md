@@ -1,6 +1,6 @@
 # enableMacSiriAI
 
-`enableMacSiriAI` 面向在中国大陆使用外版 Apple Silicon Mac 的用户。它可以读取、修改、锁定和恢复 macOS 国家码缓存，无需关闭 SIP，也不安装内核扩展。
+`enableMacSiriAI` 面向在中国大陆使用外版 Apple Silicon Mac 的用户。它可以读取、修改、锁定和恢复 macOS 国家码缓存，无需关闭 SIP，也不安装内核扩展。将国家码设为受支持的海外地区后，还可以恢复海外版 Apple Maps（地图）和 Apple News 的地区可用性。
 
 [English README](README_EN.md)
 
@@ -74,7 +74,7 @@ sudo ./enableMacSiriAI restore
 
 - 工具只修改 `/private/var/db/com.apple.countryd/countryCodeCache.plist`。
 - 不会修改 SIP、NVRAM、AMFI、硬件区域信息或 `eligibility.plist`。
-- Apple 账户地区、语言、网络、硬件及服务端资格仍可能影响 Apple Intelligence 和 Siri AI。
+- Apple 账户地区、语言、网络、硬件及服务端资格仍可能影响 Apple Intelligence、Siri AI、Apple Maps 和 Apple News；工具不保证所有功能一定可用。
 - SIP 开启时，macOS 会保护 `countryd` 和 `eligibilityd`，因此修改后需要重启 Mac。
 - macOS 系统升级可能替换已经锁定的缓存，升级后请重新运行 `enableMacSiriAI status` 检查。
 - 参见 Apple 官方的 [Apple Intelligence 要求及地区可用性说明](https://support.apple.com/zh-cn/121115)。

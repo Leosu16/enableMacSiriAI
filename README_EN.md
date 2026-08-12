@@ -1,6 +1,6 @@
 # enableMacSiriAI
 
-`enableMacSiriAI` helps people use an Apple Silicon Mac purchased outside China mainland while they are in China mainland. It reads, changes, locks, and restores macOS's country-code cache without disabling SIP or installing a kernel extension.
+`enableMacSiriAI` helps people use an Apple Silicon Mac purchased outside China mainland while they are in China mainland. It reads, changes, locks, and restores macOS's country-code cache without disabling SIP or installing a kernel extension. Setting the country code to a supported overseas region can also restore regional availability for Apple Maps and Apple News on eligible non-China-mainland Macs.
 
 [中文说明](README.md)
 
@@ -74,7 +74,7 @@ The repository also includes an optional [Siri AI and ChatGPT routing plugin](Si
 
 - The tool only changes `/private/var/db/com.apple.countryd/countryCodeCache.plist`.
 - It does not change SIP, NVRAM, AMFI, hardware region information, or `eligibility.plist`.
-- Apple Account region, language, network, hardware, and server-side eligibility can still affect Apple Intelligence and Siri AI.
+- Apple Account region, language, network, hardware, and server-side eligibility can still affect Apple Intelligence, Siri AI, Apple Maps, and Apple News; the tool cannot guarantee that every feature will become available.
 - With SIP enabled, macOS protects `countryd` and `eligibilityd` from manual restart, so a Mac restart is required after changes.
 - A macOS update may replace the locked cache. Run `enableMacSiriAI status` after updating.
 - See Apple's [Apple Intelligence requirements and regional availability](https://support.apple.com/en-asia/121115).
