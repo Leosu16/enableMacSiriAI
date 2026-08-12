@@ -70,7 +70,7 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 The repository also includes optional Siri AI and ChatGPT routing configurations. The two links below automatically download the latest versions from GitHub Releases and never need to change. Do not use a GitHub `blob` page URL:
 
-Current module version: `0.1.6` (updated `2026-08-12`). The module description also shows its version and update date so users can confirm that it is current.
+Current module version: `0.1.7` (updated `2026-08-12 23:52 UTC+8`). The module description includes the version and minute-precise update time so users can confirm that it is current. If Siri traffic still bypasses routing in Clash rule mode on macOS, add `PROCESS-NAME,assistantd,your-proxy-policy` above the Siri rules. This is a macOS/Clash-specific rule and should not be added to the Loon or Shadowrocket modules intended for iPhone and iPad.
 
 - [Automatically download the latest Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
 - [Automatically download the latest Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)

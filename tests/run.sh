@@ -116,6 +116,17 @@ test_diagnose_reports_leaking_siri_routes() {
     assert_contains "$output" "releases/latest/download/Siri_AI_ChatGPT.srmodule" || return 1
 }
 
+test_modules_include_version_metadata_without_macos_process_rule() {
+    local module
+    for module in "$ROOT/Siri_AI_ChatGPT.lpx" "$ROOT/Siri_AI_ChatGPT.srmodule"; do
+        /usr/bin/grep -Fq '版本 0.1.7' "$module" || return 1
+        /usr/bin/grep -Fq '更新时间 2026-08-12 23:52（UTC+8）' "$module" || return 1
+        if /usr/bin/grep -Fq 'PROCESS-NAME,assistantd,PROXY' "$module"; then
+            return 1
+        fi
+    done
+}
+
 test_precise_set_and_lock() {
     new_case
     ctl set US >/dev/null || return 1
@@ -279,6 +290,7 @@ run_test test_diagnose_is_read_only_and_complete
 run_test test_diagnose_recognizes_completed_setup
 run_test test_diagnose_audits_complete_siri_routes
 run_test test_diagnose_reports_leaking_siri_routes
+run_test test_modules_include_version_metadata_without_macos_process_rule
 run_test test_precise_set_and_lock
 run_test test_backup_is_first_original
 run_test test_unlock_and_restore

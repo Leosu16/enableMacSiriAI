@@ -8,7 +8,7 @@ set -u
 set -o pipefail
 
 PROGRAM="enableMacSiriAI"
-VERSION="0.1.6"
+VERSION="0.1.7"
 PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
 PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
 PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
