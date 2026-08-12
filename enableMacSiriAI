@@ -8,7 +8,7 @@ set -u
 set -o pipefail
 
 PROGRAM="enableMacSiriAI"
-VERSION="0.1.3"
+VERSION="0.1.4"
 PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
 PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
 PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
@@ -59,6 +59,7 @@ enableMacSiriAI - countryd 国家码缓存管理工具
 Usage / 用法:
   enableMacSiriAI                  Interactive menu / 交互式菜单
   enableMacSiriAI status           Inspect without administrator access / 查看状态，无需管理员权限
+  enableMacSiriAI diagnose         Diagnose Siri AI without making changes / 只读诊断 Siri AI
   enableMacSiriAI set CODE         Set and lock: US CA GB AU JP SG / 设置并锁定
   enableMacSiriAI unlock           Remove the uchg lock only / 仅解除 uchg 锁
   enableMacSiriAI restore          Restore and keep the backup / 恢复并保留备份
@@ -638,6 +639,151 @@ eligibility_value() {
     /usr/libexec/PlistBuddy -c "Print :OS_ELIGIBILITY_DOMAIN_GREYMATTER:$1" "$ELIGIBILITY_PLIST" 2>/dev/null || printf '%s\n' "—"
 }
 
+eligibility_domain_value() {
+    local domain="$1" key="$2"
+    if [ "$TEST_MODE" = "1" ]; then
+        case "$key" in
+            os_eligibility_answer_t) printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_ELIGIBILITY_ANSWER:-4}" ;;
+            *) printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_ELIGIBILITY_INPUT:-3}" ;;
+        esac
+        return 0
+    fi
+    /usr/libexec/PlistBuddy -c "Print :$domain:$key" "$ELIGIBILITY_PLIST" 2>/dev/null || printf '%s\n' "—"
+}
+
+preference_value() {
+    local domain="$1" key="$2"
+    /usr/bin/defaults export "$domain" - 2>/dev/null |
+        /usr/bin/plutil -extract "$key" raw - 2>/dev/null || printf '%s\n' "—"
+}
+
+system_locale() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_SYSTEM_LOCALE:-en_CA}"
+    else
+        /usr/bin/defaults read -g AppleLocale 2>/dev/null || printf '%s\n' "—"
+    fi
+}
+
+siri_language() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_SIRI_LANGUAGE:-en-CA}"
+    else
+        preference_value com.apple.assistant.backedup 'Session Language'
+    fi
+}
+
+siri_enabled() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_SIRI_ENABLED:-true}"
+    else
+        preference_value com.apple.assistant.support 'Assistant Enabled'
+    fi
+}
+
+siri_available() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_SIRI_AVAILABLE:-true}"
+    else
+        preference_value com.apple.assistant.backedup 'SiriAvailability.isAvailable'
+    fi
+}
+
+chatgpt_enabled() {
+    if [ "$TEST_MODE" = "1" ]; then
+        printf '%s\n' "${ENABLE_MAC_SIRI_AI_TEST_CHATGPT_ENABLED:-true}"
+    else
+        preference_value com.apple.generativepartnerservicesettings 'siriExtensionProvidersMetricsSnapshot.0.isEnabled'
+    fi
+}
+
+normalized_locale() {
+    printf '%s' "$1" | /usr/bin/sed 's/_/-/'
+}
+
+print_greymatter_input() {
+    local key="$1" value
+    value="$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_GREYMATTER "status:$key")"
+    printf '  %-38s %s\n' "${key#OS_ELIGIBILITY_INPUT_}" "$value"
+}
+
+command_diagnose() {
+    local answer foundation app_intents locale siri_locale locale_match region_match enabled available chatgpt
+    local system_country siri_country
+    local codes code_count country_ready
+
+    printf '%s %s - Siri AI diagnosis / Siri AI 诊断（只读）\n' "$PROGRAM" "$VERSION"
+    printf '  macOS:                  %s\n' "$(os_version)"
+    printf '  Architecture / 架构:   %s\n' "$(machine_arch)"
+    printf '  Device region / 设备区域: %s\n' "$(device_region 2>/dev/null || printf '%s' 'unavailable / 无法读取')"
+
+    codes=""
+    if [ -f "$TARGET" ] && validate_archive "$TARGET"; then
+        codes="$(all_country_codes "$TARGET" 2>/dev/null | /usr/bin/awk '!seen[$0]++' | /usr/bin/paste -sd, -)"
+    fi
+    printf '  CountryCode references: %s\n' "${codes:-unavailable / 无法读取}"
+
+    printf '\nEligibility / 资格:\n'
+    answer="$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_GREYMATTER os_eligibility_answer_t)"
+    foundation="$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_FOUNDATION_MODELS os_eligibility_answer_t)"
+    app_intents="$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_SIRI_WITH_APP_INTENTS os_eligibility_answer_t)"
+    printf '  GREYMATTER answer:                    %s\n' "$answer"
+    printf '  FOUNDATION_MODELS answer:             %s\n' "$foundation"
+    printf '  SIRI_WITH_APP_INTENTS answer:         %s\n' "$app_intents"
+    print_greymatter_input OS_ELIGIBILITY_INPUT_COUNTRY_BILLING
+    print_greymatter_input OS_ELIGIBILITY_INPUT_COUNTRY_LOCATION
+    print_greymatter_input OS_ELIGIBILITY_INPUT_DEVICE_AND_SIRI_LANGUAGE_MATCH
+    print_greymatter_input OS_ELIGIBILITY_INPUT_DEVICE_CLASS
+    print_greymatter_input OS_ELIGIBILITY_INPUT_DEVICE_LANGUAGE
+    print_greymatter_input OS_ELIGIBILITY_INPUT_DEVICE_REGION_CODE
+    print_greymatter_input OS_ELIGIBILITY_INPUT_EXTERNAL_BOOT_DRIVE
+    print_greymatter_input OS_ELIGIBILITY_INPUT_GENERATIVE_MODEL_SYSTEM
+    print_greymatter_input OS_ELIGIBILITY_INPUT_SHARED_IPAD
+    print_greymatter_input OS_ELIGIBILITY_INPUT_SIRI_LANGUAGE
+
+    locale="$(system_locale)"
+    siri_locale="$(siri_language)"
+    if [ "$(normalized_locale "$locale")" = "$(normalized_locale "$siri_locale")" ]; then
+        locale_match="yes / 是"
+    else
+        locale_match="no / 否"
+    fi
+    system_country="$(normalized_locale "$locale" | /usr/bin/awk -F- '{ value=$NF; sub(/@.*/, "", value); print value }')"
+    siri_country="$(normalized_locale "$siri_locale" | /usr/bin/awk -F- '{ print $NF }')"
+    if [ -n "$codes" ] && [ "$codes" = "$system_country" ] && [ "$codes" = "$siri_country" ]; then
+        region_match="yes / 是"
+    else
+        region_match="no / 否"
+    fi
+    enabled="$(siri_enabled)"
+    available="$(siri_available)"
+    chatgpt="$(chatgpt_enabled)"
+    printf '\nSiri and language / Siri 与语言:\n'
+    printf '  System locale / 系统区域:             %s\n' "$locale"
+    printf '  Siri language / Siri 语言:            %s\n' "$siri_locale"
+    printf '  Language match / 语言匹配:            %s\n' "$locale_match"
+    printf '  CountryCode/locale match / 地区匹配:  %s\n' "$region_match"
+    printf '  Siri enabled / Siri 已开启:           %s\n' "$enabled"
+    printf '  Siri available / Siri 可用:           %s\n' "$available"
+    printf '  ChatGPT extension / ChatGPT 扩展:     %s\n' "$chatgpt"
+
+    country_ready=0
+    code_count="$(printf '%s' "$codes" | /usr/bin/awk -F, 'NF { print NF }')"
+    if [ "${code_count:-0}" = "1" ] && is_allowed_country "$codes" &&
+       [ "$answer" = "4" ] &&
+       [ "$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_GREYMATTER 'status:OS_ELIGIBILITY_INPUT_COUNTRY_LOCATION')" = "3" ]; then
+        country_ready=1
+    fi
+
+    printf '\nConclusion / 结论:\n'
+    if [ "$country_ready" -eq 1 ]; then
+        ok "Country-code setup is complete. / 国家码设置已经完成。"
+        info "Any remaining problem is outside this tool: check Apple server eligibility and macOS beta availability. / 剩余问题不属于国家码修改范围，请检查 Apple 服务端资格和 macOS 测试版功能开放情况。"
+    else
+        warn "Country-code or eligibility checks are incomplete. / 国家码或资格检查尚未全部通过。"
+    fi
+}
+
 command_status() {
     local version arch sip region flags owner mode backup codes answer location
     version="$(os_version)"; arch="$(machine_arch)"; sip="$(sip_status)"
@@ -697,6 +843,7 @@ Actions / 操作:
   4) Unlock only / 仅解锁
   5) Restore original / 恢复原始缓存
   6) Refresh status / 刷新状态
+  7) Diagnose Siri AI / 诊断 Siri AI（只读）
   0) Exit / 退出
 EOF
         printf '> '
@@ -727,6 +874,7 @@ EOF
                 esac
                 ;;
             6) ;;
+            7) "$SELF" diagnose || warn "Diagnosis failed / 诊断失败" ;;
             0) return 0 ;;
             *) warn "Unknown choice / 未知选项" ;;
         esac
@@ -738,6 +886,7 @@ case "$command" in
     menu) interactive_menu ;;
     help|-h|--help) usage ;;
     status) [ "$#" -eq 1 ] || die "status takes no arguments. / status 不接受参数。"; command_status ;;
+    diagnose) [ "$#" -eq 1 ] || die "diagnose takes no arguments. / diagnose 不接受参数。"; command_diagnose ;;
     set) [ "$#" -eq 2 ] || die "Usage: enableMacSiriAI set CODE"; require_root "$@"; command_set "$2" ;;
     unlock) [ "$#" -eq 1 ] || die "unlock takes no arguments. / unlock 不接受参数。"; require_root "$@"; command_unlock ;;
     restore)

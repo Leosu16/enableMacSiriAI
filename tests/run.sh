@@ -63,6 +63,31 @@ test_status_sources() {
     assert_contains "$output" "All referenced / 全部引用 CN,CA" || return 1
 }
 
+test_diagnose_is_read_only_and_complete() {
+    new_case
+    local before output after
+    before="$(/usr/bin/shasum -a 256 "$TARGET" | /usr/bin/awk '{print $1}')"
+    output="$(ctl diagnose)" || return 1
+    after="$(/usr/bin/shasum -a 256 "$TARGET" | /usr/bin/awk '{print $1}')"
+    [ "$before" = "$after" ] || return 1
+    [ ! -e "$STATE" ] || return 1
+    assert_contains "$output" "GREYMATTER answer:                    4" || return 1
+    assert_contains "$output" "COUNTRY_LOCATION" || return 1
+    assert_contains "$output" "DEVICE_AND_SIRI_LANGUAGE_MATCH" || return 1
+    assert_contains "$output" "FOUNDATION_MODELS answer:             4" || return 1
+    assert_contains "$output" "ChatGPT extension / ChatGPT 扩展:     true" || return 1
+    assert_contains "$output" "CountryCode/locale match / 地区匹配:" || return 1
+}
+
+test_diagnose_recognizes_completed_setup() {
+    new_case
+    ctl set CA >/dev/null || return 1
+    local output
+    output="$(ctl diagnose)" || return 1
+    assert_contains "$output" "Country-code setup is complete" || return 1
+    assert_contains "$output" "剩余问题不属于国家码修改范围"
+}
+
 test_precise_set_and_lock() {
     new_case
     ctl set US >/dev/null || return 1
@@ -222,6 +247,8 @@ run_test() {
 }
 
 run_test test_status_sources
+run_test test_diagnose_is_read_only_and_complete
+run_test test_diagnose_recognizes_completed_setup
 run_test test_precise_set_and_lock
 run_test test_backup_is_first_original
 run_test test_unlock_and_restore

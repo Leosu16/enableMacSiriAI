@@ -33,6 +33,7 @@ chmod +x enableMacSiriAI
 - `4` — 只解除当前缓存锁，不修改内容
 - `5` — 恢复原始缓存
 - `6` — 刷新显示状态
+- `7` — 运行只读 Siri AI 诊断
 - `0` — 退出
 
 修改或恢复时需要输入 Mac 管理员密码。密码只会直接输入到 macOS 的 `sudo` 提示中，本工具不会保存密码。
@@ -56,6 +57,7 @@ sudo ./enableMacSiriAI restore --delete-backup    # 恢复成功后删除备份
 
 ```bash
 ./enableMacSiriAI status
+./enableMacSiriAI diagnose
 sudo ./enableMacSiriAI set US
 sudo ./enableMacSiriAI set CA
 sudo ./enableMacSiriAI unlock
@@ -63,6 +65,10 @@ sudo ./enableMacSiriAI restore
 ```
 
 可用国家码为 `US`、`CA`、`GB`、`AU`、`JP`、`SG`。
+
+`diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言，以及 Siri 与 ChatGPT 扩展状态。如果国家码和资格已经通过，它会明确提示剩余问题应从 Apple 服务端资格或 macOS 测试版功能开放情况继续排查。
+
+仓库同时提供可选的 [Siri AI 与 ChatGPT 分流插件](Siri_AI_ChatGPT.plugin)。导入兼容的代理软件后，请将插件中的 `PROXY` 映射到支持地区的代理策略。该插件与国家码修改功能相互独立。
 
 ## 注意事项
 

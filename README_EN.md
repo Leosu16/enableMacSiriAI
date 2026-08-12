@@ -33,6 +33,7 @@ Choose a country or region from the menu:
 - `4` — unlock the current cache without changing it
 - `5` — restore the original cache
 - `6` — refresh the displayed status
+- `7` — run the read-only Siri AI diagnosis
 - `0` — exit
 
 Changing or restoring the cache requires your Mac administrator password. The password is entered directly into the macOS `sudo` prompt and is not stored by this tool.
@@ -56,6 +57,7 @@ The backup is kept in `/private/var/db/enableMacSiriAI`. Restoration returns the
 
 ```bash
 ./enableMacSiriAI status
+./enableMacSiriAI diagnose
 sudo ./enableMacSiriAI set US
 sudo ./enableMacSiriAI set CA
 sudo ./enableMacSiriAI unlock
@@ -63,6 +65,10 @@ sudo ./enableMacSiriAI restore
 ```
 
 Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
+
+`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, and Siri and ChatGPT extension states. When the country code and eligibility already pass, it points further troubleshooting toward Apple server eligibility or macOS beta feature availability.
+
+The repository also includes an optional [Siri AI and ChatGPT routing plugin](Siri_AI_ChatGPT.plugin). After importing it into a compatible proxy app, map `PROXY` to a supported-region proxy policy. The plugin is independent of the country-code feature.
 
 ## Important notes
 
