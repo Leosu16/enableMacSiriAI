@@ -68,7 +68,12 @@ sudo ./enableMacSiriAI restore
 
 `diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言，以及 Siri 与 ChatGPT 扩展状态。如果国家码和资格已经通过，它会明确提示剩余问题应从 Apple 服务端资格或 macOS 测试版功能开放情况继续排查。
 
-仓库同时提供可选的 [Siri AI 与 ChatGPT 分流插件](Siri_AI_ChatGPT.plugin)。导入兼容的代理软件后，请将插件中的 `PROXY` 映射到支持地区的代理策略。该插件与国家码修改功能相互独立。
+仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置：
+
+- [Loon 插件](Siri_AI_ChatGPT.plugin)
+- [Shadowrocket 模块](Siri_AI_ChatGPT.module)
+
+导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Shadowrocket 可在“配置 → 模块 → +”中粘贴模块的 GitHub Raw 链接进行安装。这些分流配置与国家码修改功能相互独立。
 
 ## 注意事项
 

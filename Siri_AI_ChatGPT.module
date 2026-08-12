@@ -1,0 +1,98 @@
+#!name=Siri AI & ChatGPT
+#!desc=Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；启用前请确认 Shadowrocket 配置包含 PROXY 策略。
+#!system=ios
+#!homepage=https://github.com/Leosu16/enableMacSiriAI
+#!author=Leosu16
+
+[Rule]
+
+#  Siri / Apple Intelligence
+
+DOMAIN-SUFFIX,siri.apple.com,PROXY
+DOMAIN,ropes.apple.com,PROXY
+DOMAIN-SUFFIX,apple-intelligence.apple.com,PROXY
+DOMAIN-SUFFIX,ai.apple.com,PROXY
+DOMAIN-SUFFIX,guzzoni.apple.com,PROXY
+DOMAIN-SUFFIX,smoot.apple.com,PROXY
+DOMAIN-SUFFIX,ls.apple.com,PROXY
+DOMAIN-SUFFIX,apps.mzstatic.com,PROXY
+DOMAIN-SUFFIX,gateway.icloud.com,PROXY
+
+#  Apple Intelligence / Private Cloud Compute
+
+DOMAIN-SUFFIX,pcc.apple.com,PROXY
+DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com,PROXY
+DOMAIN-SUFFIX,apple-relay.apple.com,PROXY
+DOMAIN-SUFFIX,apple-relay.cloudflare.com,PROXY
+DOMAIN-SUFFIX,apple-relay.fastly-edge.com,PROXY
+DOMAIN-SUFFIX,apple-relay.mask.apple-dns.net,PROXY
+DOMAIN-SUFFIX,apple-relay.akamaized.net,PROXY
+DOMAIN-SUFFIX,cp4.cloudflare.com,PROXY
+
+#  Apple Private Relay
+
+DOMAIN-SUFFIX,mask-api.icloud.com,PROXY
+DOMAIN-SUFFIX,mask-api.fe.apple-dns.net,PROXY
+DOMAIN-SUFFIX,mask.icloud.com,PROXY
+DOMAIN-SUFFIX,mask.apple-dns.net,PROXY
+DOMAIN-SUFFIX,mask-h2.icloud.com,PROXY
+DOMAIN-SUFFIX,mask-t.apple-dns.net,PROXY
+
+# 🤖 ChatGPT / OpenAI
+
+DOMAIN-SUFFIX,chatgpt.com,PROXY
+DOMAIN-SUFFIX,openai.com,PROXY
+DOMAIN-SUFFIX,chat.com,PROXY
+DOMAIN-SUFFIX,oaistatic.com,PROXY
+DOMAIN-SUFFIX,oaiusercontent.com,PROXY
+DOMAIN-SUFFIX,oaistatsig.com,PROXY
+
+# 🤖 ChatGPT Realtime / WebSocket
+
+DOMAIN,ws.chatgpt.com,PROXY
+
+# 🎙 ChatGPT Voice / LiveKit
+
+DOMAIN-SUFFIX,chatgpt.livekit.cloud,PROXY
+DOMAIN-SUFFIX,host.livekit.cloud,PROXY
+DOMAIN-SUFFIX,turn.livekit.cloud,PROXY
+
+# 🔐 ChatGPT Login / Authentication
+
+DOMAIN,cdn.openaimerge.com,PROXY
+DOMAIN,cdn.workos.com,PROXY
+DOMAIN,forwarder.workos.com,PROXY
+DOMAIN,images.workoscdn.com,PROXY
+DOMAIN,setup.workos.com,PROXY
+DOMAIN,workos.imgix.net,PROXY
+DOMAIN,challenges.cloudflare.com,PROXY
+DOMAIN,humb.apple.com,PROXY
+
+# 🧩 ChatGPT Arkose / Challenge
+
+DOMAIN,openai-api.arkoselabs.com,PROXY
+DOMAIN-SUFFIX,client-api.arkoselabs.com,PROXY
+
+# ☁️ OpenAI CDN / Storage
+
+DOMAIN,chat.openai.com.cdn.cloudflare.net,PROXY
+DOMAIN-SUFFIX,openai.com.cdn.cloudflare.net,PROXY
+DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net,PROXY
+DOMAIN,openaicomproductionae4b.blob.core.windows.net,PROXY
+DOMAIN-SUFFIX,openaicom.imgix.net,PROXY
+DOMAIN-KEYWORD,openaicom-api,PROXY
+DOMAIN,production-openaicom-storage.azureedge.net,PROXY
+DOMAIN-SUFFIX,openaiapi-site.azureedge.net,PROXY
+
+# 📦 ChatGPT Auxiliary
+
+DOMAIN-SUFFIX,ct.sendgrid.net,PROXY
+DOMAIN-SUFFIX,intercom.io,PROXY
+DOMAIN-SUFFIX,intercomcdn.com,PROXY
+DOMAIN,js.stripe.com,PROXY
+
+# 📊 ChatGPT Diagnostics
+
+DOMAIN,o207216.ingest.sentry.io,PROXY
+DOMAIN,o33249.ingest.sentry.io,PROXY
+DOMAIN,rum.browser-intake-datadoghq.com,PROXY

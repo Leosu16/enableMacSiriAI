@@ -68,7 +68,12 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 `diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, and Siri and ChatGPT extension states. When the country code and eligibility already pass, it points further troubleshooting toward Apple server eligibility or macOS beta feature availability.
 
-The repository also includes an optional [Siri AI and ChatGPT routing plugin](Siri_AI_ChatGPT.plugin). After importing it into a compatible proxy app, map `PROXY` to a supported-region proxy policy. The plugin is independent of the country-code feature.
+The repository also includes optional Siri AI and ChatGPT routing configurations:
+
+- [Loon plugin](Siri_AI_ChatGPT.plugin)
+- [Shadowrocket module](Siri_AI_ChatGPT.module)
+
+After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. In Shadowrocket, install the module by opening Config → Modules → + and pasting its GitHub Raw URL. These routing configurations are independent of the country-code feature.
 
 ## Important notes
 
