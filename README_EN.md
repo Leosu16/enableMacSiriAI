@@ -68,10 +68,10 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 `diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, Siri and ChatGPT extension states, and actively connects to Siri AI/PCC endpoints. The network test geolocates the connected endpoint IP and only lists domains that appear to reach a China endpoint. Fake-IP mode can leave individual endpoints indeterminate, but those results are not misreported as China IPs.
 
-The repository also includes optional Siri AI and ChatGPT routing configurations. Use the stable Release download URLs rather than a GitHub `blob` page URL:
+The repository also includes optional Siri AI and ChatGPT routing configurations. The two links below automatically download the latest versions from GitHub Releases and never need to change. Do not use a GitHub `blob` page URL:
 
-- [Download the Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
-- [Download the Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
+- [Automatically download the latest Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
+- [Automatically download the latest Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
 - Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
 
 After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` Release URL. These routing configurations are independent of the country-code feature.
