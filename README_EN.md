@@ -70,10 +70,10 @@ Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
 The repository also includes optional Siri AI and ChatGPT routing resources:
 
-Current routing resource version: `0.1.8` (updated `2026-08-13 00:00 UTC+8`).
+Current routing resource version: `0.1.9` (updated `2026-08-13 00:22 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets.
 
-- [Automatically download the latest Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
-- [Automatically download the latest Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
+- [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
+- [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule) · [Clash/Mihomo](Siri_AI_Clash.yaml)
 

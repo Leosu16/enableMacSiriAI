@@ -114,15 +114,17 @@ test_diagnose_reports_leaking_siri_routes() {
     assert_contains "$output" "TUN stack to system" || return 1
     assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml" || return 1
     assert_contains "$output" "place RULE-SET first" || return 1
-    assert_contains "$output" "releases/latest/download/Siri_AI_ChatGPT.lpx" || return 1
-    assert_contains "$output" "releases/latest/download/Siri_AI_ChatGPT.srmodule" || return 1
+    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx" || return 1
+    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule" || return 1
 }
 
-test_modules_include_version_metadata_without_macos_process_rule() {
+test_modules_include_update_time_without_version_or_macos_process_rule() {
     local module
     for module in "$ROOT/Siri_AI_ChatGPT.lpx" "$ROOT/Siri_AI_ChatGPT.srmodule"; do
-        /usr/bin/grep -Fq '版本 0.1.8' "$module" || return 1
-        /usr/bin/grep -Fq '更新时间 2026-08-13 00:00（UTC+8）' "$module" || return 1
+        /usr/bin/grep -Fq '最后更新时间 2026-08-13 00:22（UTC+8）' "$module" || return 1
+        if /usr/bin/grep -Fq '版本 0.1.9' "$module"; then
+            return 1
+        fi
         if /usr/bin/grep -Fq 'PROCESS-NAME,assistantd,PROXY' "$module"; then
             return 1
         fi
@@ -134,7 +136,7 @@ test_clash_ruleset_is_classical_and_includes_assistantd() {
     /usr/bin/grep -Fq 'payload:' "$ruleset" || return 1
     /usr/bin/grep -Fq 'PROCESS-NAME,assistantd' "$ruleset" || return 1
     /usr/bin/grep -Fq 'DOMAIN-SUFFIX,pcc.apple.com' "$ruleset" || return 1
-    /usr/bin/grep -Fq 'Version 0.1.8 · Updated 2026-08-13 00:00 (UTC+8)' "$ruleset" || return 1
+    /usr/bin/grep -Fq 'Version 0.1.9 · Updated 2026-08-13 00:22 (UTC+8)' "$ruleset" || return 1
 }
 
 test_precise_set_and_lock() {
@@ -300,7 +302,7 @@ run_test test_diagnose_is_read_only_and_complete
 run_test test_diagnose_recognizes_completed_setup
 run_test test_diagnose_audits_complete_siri_routes
 run_test test_diagnose_reports_leaking_siri_routes
-run_test test_modules_include_version_metadata_without_macos_process_rule
+run_test test_modules_include_update_time_without_version_or_macos_process_rule
 run_test test_clash_ruleset_is_classical_and_includes_assistantd
 run_test test_precise_set_and_lock
 run_test test_backup_is_first_original

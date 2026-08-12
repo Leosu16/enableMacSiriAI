@@ -8,7 +8,7 @@ set -u
 set -o pipefail
 
 PROGRAM="enableMacSiriAI"
-VERSION="0.1.8"
+VERSION="0.1.9"
 PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
 PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
 PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
@@ -25,8 +25,8 @@ pcc.apple.com
 staging.apple-carry-relay.cloudflare.com
 uschi7.icloud-content.com
 "
-LOON_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx"
-SHADOWROCKET_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule"
+LOON_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx"
+SHADOWROCKET_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule"
 CLASH_RULESET_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml"
 
 TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
