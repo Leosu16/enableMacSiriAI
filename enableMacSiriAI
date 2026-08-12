@@ -8,7 +8,7 @@ set -u
 set -o pipefail
 
 PROGRAM="enableMacSiriAI"
-VERSION="0.1.7"
+VERSION="0.1.8"
 PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
 PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
 PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
@@ -27,6 +27,7 @@ uschi7.icloud-content.com
 "
 LOON_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx"
 SHADOWROCKET_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule"
+CLASH_RULESET_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml"
 
 TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
 if [ "$TEST_MODE" = "1" ]; then
@@ -830,8 +831,9 @@ EOF
 
     if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
         warn "Siri AI may not be able to access the network normally. / Siri AI 可能无法正常联网。"
-        info "If access fails, use the latest routing module below, or enable global proxy and TUN mode. / 如果无法正常访问，可使用下方最新版分流模块，或将代理切换为全局并开启 TUN 模式。"
+        info "If access fails, use the latest routing resource below, or enable global proxy and TUN mode. / 如果无法正常访问，可使用下方最新版分流资源，或将代理切换为全局并开启 TUN 模式。"
         info "For Clash, set the TUN stack to system. / 如果使用 Clash，请将 TUN 模式堆栈改为 system。"
+        info "Clash (place RULE-SET first / 置顶规则集): $CLASH_RULESET_URL"
         info "Loon: $LOON_MODULE_URL"
         info "Shadowrocket: $SHADOWROCKET_MODULE_URL"
     else

@@ -1,0 +1,31 @@
+# Siri AI for Clash Verge Rev / Mihomo
+# Version 0.1.8 · Updated 2026-08-13 00:00 (UTC+8)
+
+payload:
+  - PROCESS-NAME,assistantd
+  - DOMAIN-SUFFIX,siri.apple.com
+  - DOMAIN,ropes.apple.com
+  - DOMAIN-SUFFIX,apple-intelligence.apple.com
+  - DOMAIN-SUFFIX,ai.apple.com
+  - DOMAIN-SUFFIX,guzzoni.apple.com
+  - DOMAIN-SUFFIX,smoot.apple.com
+  - DOMAIN-SUFFIX,ls.apple.com
+  - DOMAIN-SUFFIX,apps.mzstatic.com
+  - DOMAIN-SUFFIX,gateway.icloud.com
+  - DOMAIN,probe.icloud.com
+  - DOMAIN,api-siri-prod.apple.com
+  - DOMAIN-SUFFIX,icloud-content.com
+  - DOMAIN-SUFFIX,pcc.apple.com
+  - DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com
+  - DOMAIN-SUFFIX,apple-relay.apple.com
+  - DOMAIN-SUFFIX,apple-relay.cloudflare.com
+  - DOMAIN-SUFFIX,apple-relay.fastly-edge.com
+  - DOMAIN-SUFFIX,apple-relay.mask.apple-dns.net
+  - DOMAIN-SUFFIX,apple-relay.akamaized.net
+  - DOMAIN-SUFFIX,cp4.cloudflare.com
+  - DOMAIN-SUFFIX,mask-api.icloud.com
+  - DOMAIN-SUFFIX,mask-api.fe.apple-dns.net
+  - DOMAIN-SUFFIX,mask.icloud.com
+  - DOMAIN-SUFFIX,mask.apple-dns.net
+  - DOMAIN-SUFFIX,mask-h2.icloud.com
+  - DOMAIN-SUFFIX,mask-t.apple-dns.net

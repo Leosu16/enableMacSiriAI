@@ -66,19 +66,22 @@ sudo ./enableMacSiriAI restore
 
 Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
-`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, Siri and ChatGPT extension states, and actively connects to Siri AI/PCC endpoints. The network test geolocates the connected endpoint IP. If a China IP or an indeterminate result is detected, the tool hides the domain, IP, and failure details and only shows network troubleshooting guidance plus the latest module download links.
+`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, Siri and ChatGPT extension states, and actively connects to Siri AI/PCC endpoints. The network test geolocates the connected endpoint IP. If a China IP or an indeterminate result is detected, the tool hides the domain, IP, and failure details and only shows network troubleshooting guidance plus the latest routing resource links.
 
-The repository also includes optional Siri AI and ChatGPT routing configurations. The two links below automatically download the latest versions from GitHub Releases and never need to change. Do not use a GitHub `blob` page URL:
+The repository also includes optional Siri AI and ChatGPT routing resources:
 
-Current module version: `0.1.7` (updated `2026-08-12 23:52 UTC+8`). The module description includes the version and minute-precise update time so users can confirm that it is current. If Siri traffic still bypasses routing in Clash rule mode on macOS, add `PROCESS-NAME,assistantd,your-proxy-policy` above the Siri rules. This is a macOS/Clash-specific rule and should not be added to the Loon or Shadowrocket modules intended for iPhone and iPad.
+Current routing resource version: `0.1.8` (updated `2026-08-13 00:00 UTC+8`).
 
 - [Automatically download the latest Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
 - [Automatically download the latest Shadowrocket module (`.srmodule`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule)
-- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
+- [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
+- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule) · [Clash/Mihomo](Siri_AI_Clash.yaml)
 
 After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` Release URL. These routing configurations are independent of the country-code feature.
 
-If Siri AI cannot access the network normally, use one of the modules above, or enable global proxy and TUN mode. When using Clash, set the TUN stack to `system`.
+For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
+
+If Siri AI cannot access the network normally, use one of the routing resources above, or enable global proxy and TUN mode. When using Clash, set the TUN stack to `system`.
 
 ## Important notes
 
