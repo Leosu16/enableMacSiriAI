@@ -17,6 +17,9 @@ DOMAIN-SUFFIX,smoot.apple.com,PROXY
 DOMAIN-SUFFIX,ls.apple.com,PROXY
 DOMAIN-SUFFIX,apps.mzstatic.com,PROXY
 DOMAIN-SUFFIX,gateway.icloud.com,PROXY
+DOMAIN,probe.icloud.com,PROXY
+DOMAIN,api-siri-prod.apple.com,PROXY
+DOMAIN-SUFFIX,icloud-content.com,PROXY
 
 #  Apple Intelligence / Private Cloud Compute
 
