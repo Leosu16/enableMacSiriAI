@@ -66,14 +66,15 @@ sudo ./enableMacSiriAI restore
 
 可用国家码为 `US`、`CA`、`GB`、`AU`、`JP`、`SG`。
 
-`diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言，以及 Siri 与 ChatGPT 扩展状态。如果国家码和资格已经通过，它会明确提示剩余问题应从 Apple 服务端资格或 macOS 测试版功能开放情况继续排查。
+`diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言、Siri 与 ChatGPT 扩展状态，并实际连接 Siri AI/PCC 端点。联网检测会查询连接端点 IP 的国家/地区；仅在发现中国 IP 时列出疑似漏代理的域名。使用 Fake-IP 时可能无法判断个别端点，但不会误报为中国 IP。
 
-仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置：
+仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置。建议直接使用 Release 固定下载地址，不要使用 GitHub 的 `blob` 页面链接：
 
-- [Loon 插件](Siri_AI_ChatGPT.plugin)
-- [Shadowrocket 模块](Siri_AI_ChatGPT.module)
+- [下载 Loon 插件（`.lpx`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
+- [下载 Shadowrocket 模块（`.module`）](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.module)
+- 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.module)
 
-导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Shadowrocket 可在“配置 → 模块 → +”中粘贴模块的 GitHub Raw 链接进行安装。这些分流配置与国家码修改功能相互独立。
+导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` Release 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.module` Release 地址。这些分流配置与国家码修改功能相互独立。
 
 ## 注意事项
 

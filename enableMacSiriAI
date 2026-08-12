@@ -8,12 +8,23 @@ set -u
 set -o pipefail
 
 PROGRAM="enableMacSiriAI"
-VERSION="0.1.4"
+VERSION="0.1.5"
 PRODUCTION_TARGET="/private/var/db/com.apple.countryd/countryCodeCache.plist"
 PRODUCTION_STATE_DIR="/private/var/db/enableMacSiriAI"
 PRODUCTION_LEGACY_STATE_DIR="/private/var/db/countryctl"
 ELIGIBILITY_PLIST="/private/var/db/eligibilityd/eligibility.plist"
 ALLOWED_COUNTRIES="US CA GB AU JP SG"
+SIRI_ROUTE_DOMAINS="
+seed.siri.apple.com
+ropes.apple.com
+guzzoni.smoot.apple.com
+gateway.icloud.com
+probe.icloud.com
+api-siri-prod.apple.com
+pcc.apple.com
+staging.apple-carry-relay.cloudflare.com
+uschi7.icloud-content.com
+"
 
 TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
 if [ "$TEST_MODE" = "1" ]; then
@@ -701,6 +712,133 @@ normalized_locale() {
     printf '%s' "$1" | /usr/bin/sed 's/_/-/'
 }
 
+system_proxy_url() {
+    local settings enabled host port
+    [ "$TEST_MODE" != "1" ] || return 1
+    settings="$(/usr/sbin/scutil --proxy 2>/dev/null)" || return 1
+    enabled="$(printf '%s\n' "$settings" | /usr/bin/awk '/HTTPS?Enable :/ { if ($3 == 1) { print $3; exit } }')"
+    [ "$enabled" = "1" ] || return 1
+    host="$(printf '%s\n' "$settings" | /usr/bin/awk '/HTTPS?Proxy :/ { print $3; exit }')"
+    port="$(printf '%s\n' "$settings" | /usr/bin/awk '/HTTPS?Port :/ { print $3; exit }')"
+    [ -n "$host" ] && [ -n "$port" ] || return 1
+    printf 'http://%s:%s\n' "$host" "$port"
+}
+
+public_dns_ip_for_domain() {
+    local domain="$1" json result
+    json="$(/usr/bin/curl --silent --show-error --fail --get --max-time 8 \
+        --data-urlencode "name=$domain" --data 'type=A' 'https://dns.google/resolve' 2>/dev/null)" || return 1
+    result="$(printf '%s' "$json" | /usr/bin/plutil -convert xml1 -o - - 2>/dev/null | /usr/bin/awk '
+        /<key>data<\/key>/ { want_data=1; next }
+        want_data && /<string>/ {
+            data=$0
+            sub(/^.*<string>/, "", data)
+            sub(/<\/string>.*$/, "", data)
+            want_data=0
+            next
+        }
+        /<key>type<\/key>/ { want_type=1; next }
+        want_type && /<integer>1<\/integer>/ { if (data ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/) { print data; exit }; want_type=0; next }
+        want_type && /<integer>/ { want_type=0; next }
+        /<\/dict>/ { data=""; want_data=0; want_type=0 }
+    ')"
+    [ -n "$result" ] || return 1
+    printf '%s\n' "$result"
+}
+
+connected_ip_for_domain() {
+    local domain="$1" proxy rc ip
+    if [ "$TEST_MODE" = "1" ]; then
+        if [ -n "${ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS:-}" ]; then
+            /usr/bin/awk -v wanted="$domain" '$1==wanted { print $2; exit }' "$ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS"
+        fi
+        return 0
+    fi
+    proxy="$(system_proxy_url 2>/dev/null || true)"
+    if [ -n "$proxy" ]; then
+        /usr/bin/curl --insecure --silent --show-error --output /dev/null \
+            --connect-timeout 4 --max-time 8 --proxy "$proxy" "https://${domain}/" 2>/dev/null
+        rc=$?
+    else
+        /usr/bin/curl --insecure --silent --show-error --output /dev/null \
+            --connect-timeout 4 --max-time 8 "https://${domain}/" 2>/dev/null
+        rc=$?
+    fi
+    [ "$rc" -eq 0 ] || return 1
+    ip="$(/usr/bin/dscacheutil -q host -a name "$domain" 2>/dev/null | /usr/bin/awk '/ip_address:/ { print $2; exit }')"
+    if [ -z "$ip" ] && command -v /usr/bin/dig >/dev/null 2>&1; then
+        ip="$(/usr/bin/dig +short A "$domain" 2>/dev/null | /usr/bin/awk 'NF { print; exit }')"
+    fi
+    if [ -n "$ip" ] && is_fake_or_local_ip "$ip"; then
+        ip="$(public_dns_ip_for_domain "$domain" 2>/dev/null || printf '%s' "$ip")"
+    fi
+    printf '%s\n' "$ip"
+}
+
+country_for_ip() {
+    local ip="$1" json
+    if [ "$TEST_MODE" = "1" ] && [ -n "${ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS:-}" ]; then
+        /usr/bin/awk -v wanted="$ip" '$2==wanted { print $3; exit }' "$ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS"
+        return 0
+    fi
+    json="$(/usr/bin/curl --silent --show-error --fail --get --max-time 8 \
+        --data-urlencode "ip=$ip" 'https://api.iplocation.net/' 2>/dev/null)" || return 1
+    printf '%s' "$json" | /usr/bin/plutil -extract country_code2 raw - 2>/dev/null
+}
+
+is_fake_or_local_ip() {
+    case "$1" in
+        10.*|127.*|169.254.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*|192.168.*|198.18.*|198.19.*|::1|fc*|fd*|fe80:*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+audit_siri_routes() {
+    local domain ip country proxy proxy_label
+    SIRI_ROUTE_LEAK_COUNT=0
+    SIRI_ROUTE_UNKNOWN_COUNT=0
+    printf '\nSiri AI network endpoints / Siri AI 联网端点:\n'
+    proxy="$(system_proxy_url 2>/dev/null || true)"
+    if [ -n "$proxy" ]; then proxy_label="$proxy"; else proxy_label="none or TUN / 未检测到或使用 TUN"; fi
+    printf '  System proxy / 系统代理: %s\n' "$proxy_label"
+    while IFS= read -r domain; do
+        [ -n "$domain" ] || continue
+        ip="$(connected_ip_for_domain "$domain")"
+        if [ -z "$ip" ]; then
+            SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
+            printf '  UNKNOWN / 无法判定 %-43s connection failed / 连接失败\n' "$domain"
+            continue
+        fi
+        if is_fake_or_local_ip "$ip"; then
+            SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
+            printf '  UNKNOWN / 无法判定 %-43s %s (Fake-IP)\n' "$domain" "$ip"
+            continue
+        fi
+        country="$(country_for_ip "$ip" 2>/dev/null)" || country=""
+        case "$country" in
+            CN)
+                SIRI_ROUTE_LEAK_COUNT=$((SIRI_ROUTE_LEAK_COUNT + 1))
+                printf '  LEAK / 疑似漏代理 %-41s %s (%s)\n' "$domain" "$ip" "$country"
+                ;;
+            "")
+                SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
+                printf '  UNKNOWN / 无法判定 %-43s %s\n' "$domain" "$ip"
+                ;;
+            *) ;;
+        esac
+    done <<EOF
+$SIRI_ROUTE_DOMAINS
+EOF
+
+    if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ]; then
+        warn "$SIRI_ROUTE_LEAK_COUNT Siri AI domain(s) resolved or connected to China endpoints. / 有 $SIRI_ROUTE_LEAK_COUNT 个 Siri AI 域名解析或连接到了中国端点。"
+    elif [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
+        warn "No China endpoint was found, but $SIRI_ROUTE_UNKNOWN_COUNT result(s) could not be determined. / 未发现中国端点，但有 $SIRI_ROUTE_UNKNOWN_COUNT 项无法判定。"
+    else
+        ok "No Siri AI domain connected to a China endpoint. / 未发现连接到中国端点的 Siri AI 域名。"
+    fi
+}
+
 print_greymatter_input() {
     local key="$1" value
     value="$(eligibility_domain_value OS_ELIGIBILITY_DOMAIN_GREYMATTER "status:$key")"
@@ -767,6 +905,8 @@ command_diagnose() {
     printf '  Siri available / Siri 可用:           %s\n' "$available"
     printf '  ChatGPT extension / ChatGPT 扩展:     %s\n' "$chatgpt"
 
+    audit_siri_routes
+
     country_ready=0
     code_count="$(printf '%s' "$codes" | /usr/bin/awk -F, 'NF { print NF }')"
     if [ "${code_count:-0}" = "1" ] && is_allowed_country "$codes" &&
@@ -778,7 +918,11 @@ command_diagnose() {
     printf '\nConclusion / 结论:\n'
     if [ "$country_ready" -eq 1 ]; then
         ok "Country-code setup is complete. / 国家码设置已经完成。"
-        info "Any remaining problem is outside this tool: check Apple server eligibility and macOS beta availability. / 剩余问题不属于国家码修改范围，请检查 Apple 服务端资格和 macOS 测试版功能开放情况。"
+        if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ]; then
+            warn "Siri AI networking may be leaking; fix the China endpoints listed above. / Siri AI 联网可能漏代理，请修复上方列出的中国端点。"
+        else
+            info "Any remaining problem is outside the country-code setup; check proxy routing, Apple server eligibility, and macOS beta availability. / 剩余问题不属于国家码修改范围，请检查代理分流、Apple 服务端资格和 macOS 测试版功能开放情况。"
+        fi
     else
         warn "Country-code or eligibility checks are incomplete. / 国家码或资格检查尚未全部通过。"
     fi

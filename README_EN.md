@@ -66,14 +66,15 @@ sudo ./enableMacSiriAI restore
 
 Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
-`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, and Siri and ChatGPT extension states. When the country code and eligibility already pass, it points further troubleshooting toward Apple server eligibility or macOS beta feature availability.
+`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, Siri and ChatGPT extension states, and actively connects to Siri AI/PCC endpoints. The network test geolocates the connected endpoint IP and only lists domains that appear to reach a China endpoint. Fake-IP mode can leave individual endpoints indeterminate, but those results are not misreported as China IPs.
 
-The repository also includes optional Siri AI and ChatGPT routing configurations:
+The repository also includes optional Siri AI and ChatGPT routing configurations. Use the stable Release download URLs rather than a GitHub `blob` page URL:
 
-- [Loon plugin](Siri_AI_ChatGPT.plugin)
-- [Shadowrocket module](Siri_AI_ChatGPT.module)
+- [Download the Loon plugin (`.lpx`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx)
+- [Download the Shadowrocket module (`.module`)](https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.module)
+- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.module)
 
-After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. In Shadowrocket, install the module by opening Config → Modules → + and pasting its GitHub Raw URL. These routing configurations are independent of the country-code feature.
+After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` Release URL directly. In Shadowrocket, open Config → Modules → + and paste the `.module` Release URL. These routing configurations are independent of the country-code feature.
 
 ## Important notes
 

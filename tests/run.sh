@@ -35,6 +35,7 @@ ctl() {
       ENABLE_MAC_SIRI_AI_OS_VERSION="${TEST_OS_VERSION:-27.0}" \
       ENABLE_MAC_SIRI_AI_ARCH="${TEST_ARCH:-arm64}" \
       ENABLE_MAC_SIRI_AI_REGION="${TEST_REGION:-LL/A}" \
+      ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS="${TEST_ROUTE_RESULTS:-}" \
       ENABLE_MAC_SIRI_AI_SKIP_SUDO=1 \
       ENABLE_MAC_SIRI_AI_SKIP_REFRESH=1 \
       "$ROOT/enableMacSiriAI" "$@"
@@ -86,6 +87,28 @@ test_diagnose_recognizes_completed_setup() {
     output="$(ctl diagnose)" || return 1
     assert_contains "$output" "Country-code setup is complete" || return 1
     assert_contains "$output" "剩余问题不属于国家码修改范围"
+}
+
+test_diagnose_audits_complete_siri_routes() {
+    new_case
+    local output
+    TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-complete.tsv" output="$(ctl diagnose)" || return 1
+    assert_contains "$output" "No Siri AI domain connected to a China endpoint" || return 1
+    ! assert_contains "$output" "api-siri-prod.apple.com" || return 1
+    ! assert_contains "$output" "uschi7.icloud-content.com" || return 1
+    ! assert_contains "$output" "LEAK / 疑似漏代理"
+}
+
+test_diagnose_reports_leaking_siri_routes() {
+    new_case
+    ctl set CA >/dev/null || return 1
+    local output
+    TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-leaking.tsv" output="$(ctl diagnose 2>&1)" || return 1
+    assert_contains "$output" "probe.icloud.com" || return 1
+    assert_contains "$output" "api-siri-prod.apple.com" || return 1
+    assert_contains "$output" "UNKNOWN / 无法判定" || return 1
+    assert_contains "$output" "uschi7.icloud-content.com" || return 1
+    assert_contains "$output" "Siri AI networking may be leaking" || return 1
 }
 
 test_precise_set_and_lock() {
@@ -249,6 +272,8 @@ run_test() {
 run_test test_status_sources
 run_test test_diagnose_is_read_only_and_complete
 run_test test_diagnose_recognizes_completed_setup
+run_test test_diagnose_audits_complete_siri_routes
+run_test test_diagnose_reports_leaking_siri_routes
 run_test test_precise_set_and_lock
 run_test test_backup_is_first_original
 run_test test_unlock_and_restore
