@@ -11,7 +11,7 @@
 
 - macOS 27
 - Apple Silicon Mac
-- Mac purchased outside China mainland (`region-info` must not be `CH/A`)
+- Mac purchased outside China mainland
 - Administrator account
 
 China-mainland Mac models are not supported. The tool refuses to change an unsupported device or an unknown cache format.
@@ -38,7 +38,7 @@ Choose a country or region from the menu:
 
 Changing or restoring the cache requires your Mac administrator password. The password is entered directly into the macOS `sudo` prompt and is not stored by this tool.
 
-After changing a country code, restart the Mac. Run `enableMacSiriAI` again to confirm that every displayed country source uses the selected code and that the cache is marked `uchg`.
+After changing a country code, restart the Mac. Run `enableMacSiriAI` again to confirm that the country code and lock status are correct.
 
 ## Restore the original cache
 
@@ -51,7 +51,7 @@ sudo ./enableMacSiriAI restore                    # Restore and keep the backup
 sudo ./enableMacSiriAI restore --delete-backup    # Restore, then delete the backup
 ```
 
-The backup is kept in `/private/var/db/enableMacSiriAI`. Restoration returns the cache to its original contents and unlocks it. If the backup is deleted, the next country-code change creates a new backup from the cache that exists at that time. Restart the Mac afterward.
+The tool automatically saves the original cache for restoration. Restart the Mac after restoring it.
 
 ## Other commands
 
@@ -66,16 +66,13 @@ sudo ./enableMacSiriAI restore
 
 Available country codes are `US`, `CA`, `GB`, `AU`, `JP`, and `SG`.
 
-`diagnose` does not require administrator access and never changes files. It checks all GREYMATTER inputs, Foundation Models and Siri App Intents eligibility, system and Siri languages, Siri and ChatGPT extension states, and actively connects to Siri AI/PCC endpoints. The network test geolocates the connected endpoint IP. If a China IP or an indeterminate result is detected, the tool hides the domain, IP, and failure details and only shows network troubleshooting guidance plus the latest routing resource links.
+`diagnose` shows device eligibility, country code, language, Siri and ChatGPT extensions, and Siri AI network status. If it finds a network issue, it also displays troubleshooting guidance and the latest routing resource links.
 
 The repository also includes optional Siri AI and ChatGPT routing resources:
-
-Current routing resource version: `0.2.0` (updated `2026-08-13 00:42 UTC+8`). All three links below read directly from the repository's `main` branch, so committed updates take effect without uploading separate Release assets. The Loon and Shadowrocket module details show the version date and minimum system version `27` without declaring supported systems.
 
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
-- Repository sources: [Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule) · [Clash/Mihomo](Siri_AI_Clash.yaml)
 
 After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL. These routing configurations are independent of the country-code feature.
 
@@ -85,10 +82,9 @@ If Siri AI cannot access the network normally, use one of the routing resources 
 
 ## Important notes
 
-- The tool only changes `/private/var/db/com.apple.countryd/countryCodeCache.plist`.
-- It does not change SIP, NVRAM, AMFI, hardware region information, or `eligibility.plist`.
+- The tool only changes the macOS country-code cache. It does not disable SIP or change hardware region information.
 - Apple Account region, language, network, hardware, and server-side eligibility can still affect Apple Intelligence, Siri AI, Apple Maps, and Apple News; the tool cannot guarantee that every feature will become available.
-- With SIP enabled, macOS protects `countryd` and `eligibilityd` from manual restart, so a Mac restart is required after changes.
+- Restart the Mac after changing or restoring the cache.
 - A macOS update may replace the locked cache. Run `enableMacSiriAI status` after updating.
 - See Apple's [Apple Intelligence requirements and regional availability](https://support.apple.com/en-asia/121115).
 
@@ -96,4 +92,4 @@ If Siri AI cannot access the network normally, use one of the routing resources 
 
 Source code is available under the [PolyForm Noncommercial License 1.0.0](LICENSE).
 
-Personal, educational, research, hobby, and other noncommercial use is permitted under the license. Commercial use requires separate written permission from the project owner. Because commercial use is restricted, this is source-available software rather than OSI-approved open-source software.
+Personal, educational, research, hobby, and other noncommercial use is permitted. Commercial use requires separate written permission from the project owner.
