@@ -25,6 +25,8 @@ pcc.apple.com
 staging.apple-carry-relay.cloudflare.com
 uschi7.icloud-content.com
 "
+LOON_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.lpx"
+SHADOWROCKET_MODULE_URL="https://github.com/Leosu16/enableMacSiriAI/releases/latest/download/Siri_AI_ChatGPT.srmodule"
 
 TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
 if [ "$TEST_MODE" = "1" ]; then
@@ -806,23 +808,19 @@ audit_siri_routes() {
         ip="$(connected_ip_for_domain "$domain")"
         if [ -z "$ip" ]; then
             SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
-            printf '  UNKNOWN / 无法判定 %-43s connection failed / 连接失败\n' "$domain"
             continue
         fi
         if is_fake_or_local_ip "$ip"; then
             SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
-            printf '  UNKNOWN / 无法判定 %-43s %s (Fake-IP)\n' "$domain" "$ip"
             continue
         fi
         country="$(country_for_ip "$ip" 2>/dev/null)" || country=""
         case "$country" in
             CN)
                 SIRI_ROUTE_LEAK_COUNT=$((SIRI_ROUTE_LEAK_COUNT + 1))
-                printf '  LEAK / 疑似漏代理 %-41s %s (%s)\n' "$domain" "$ip" "$country"
                 ;;
             "")
                 SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
-                printf '  UNKNOWN / 无法判定 %-43s %s\n' "$domain" "$ip"
                 ;;
             *) ;;
         esac
@@ -830,10 +828,12 @@ audit_siri_routes() {
 $SIRI_ROUTE_DOMAINS
 EOF
 
-    if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ]; then
-        warn "$SIRI_ROUTE_LEAK_COUNT Siri AI domain(s) resolved or connected to China endpoints. / 有 $SIRI_ROUTE_LEAK_COUNT 个 Siri AI 域名解析或连接到了中国端点。"
-    elif [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
-        warn "No China endpoint was found, but $SIRI_ROUTE_UNKNOWN_COUNT result(s) could not be determined. / 未发现中国端点，但有 $SIRI_ROUTE_UNKNOWN_COUNT 项无法判定。"
+    if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
+        warn "Siri AI may not be able to access the network normally. / Siri AI 可能无法正常联网。"
+        info "If access fails, use the latest routing module below, or enable global proxy and TUN mode. / 如果无法正常访问，可使用下方最新版分流模块，或将代理切换为全局并开启 TUN 模式。"
+        info "For Clash, set the TUN stack to system. / 如果使用 Clash，请将 TUN 模式堆栈改为 system。"
+        info "Loon: $LOON_MODULE_URL"
+        info "Shadowrocket: $SHADOWROCKET_MODULE_URL"
     else
         ok "No Siri AI domain connected to a China endpoint. / 未发现连接到中国端点的 Siri AI 域名。"
     fi
@@ -918,8 +918,8 @@ command_diagnose() {
     printf '\nConclusion / 结论:\n'
     if [ "$country_ready" -eq 1 ]; then
         ok "Country-code setup is complete. / 国家码设置已经完成。"
-        if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ]; then
-            warn "Siri AI networking may be leaking; fix the China endpoints listed above. / Siri AI 联网可能漏代理，请修复上方列出的中国端点。"
+        if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
+            info "Follow the network suggestions above if Siri AI is unavailable. / 如果 Siri AI 仍不可用，请按上方联网建议处理。"
         else
             info "Any remaining problem is outside the country-code setup; check proxy routing, Apple server eligibility, and macOS beta availability. / 剩余问题不属于国家码修改范围，请检查代理分流、Apple 服务端资格和 macOS 测试版功能开放情况。"
         fi

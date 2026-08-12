@@ -66,7 +66,7 @@ sudo ./enableMacSiriAI restore
 
 可用国家码为 `US`、`CA`、`GB`、`AU`、`JP`、`SG`。
 
-`diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言、Siri 与 ChatGPT 扩展状态，并实际连接 Siri AI/PCC 端点。联网检测会查询连接端点 IP 的国家/地区；仅在发现中国 IP 时列出疑似漏代理的域名。使用 Fake-IP 时可能无法判断个别端点，但不会误报为中国 IP。
+`diagnose` 无需管理员权限，也不会修改任何文件。它会检查完整的 GREYMATTER 资格输入、Foundation Models 与 Siri App Intents、系统和 Siri 语言、Siri 与 ChatGPT 扩展状态，并实际连接 Siri AI/PCC 端点。联网检测会查询连接端点 IP 的国家/地区；如果检测到中国 IP 或出现无法判定的结果，工具不会展示具体域名、IP 或失败原因，只会给出联网处理建议和最新版模块下载链接。
 
 仓库同时提供可选的 Siri AI 与 ChatGPT 分流配置。下面两个链接会自动下载 GitHub Release 中的最新版本；地址始终不变，不要使用 GitHub 的 `blob` 页面链接：
 
@@ -75,6 +75,8 @@ sudo ./enableMacSiriAI restore
 - 仓库源文件：[Loon](Siri_AI_ChatGPT.lpx) · [Shadowrocket](Siri_AI_ChatGPT.srmodule)
 
 导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` Release 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` Release 地址。这些分流配置与国家码修改功能相互独立。
+
+如果 Siri AI 无法正常访问，可使用上述模块，或将代理切换为全局并开启 TUN 模式。如果使用 Clash，请将 TUN 模式堆栈改为 `system`。
 
 ## 注意事项
 
