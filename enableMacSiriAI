@@ -19,11 +19,9 @@ seed.siri.apple.com
 ropes.apple.com
 guzzoni.smoot.apple.com
 gateway.icloud.com
-probe.icloud.com
 api-siri-prod.apple.com
-pcc.apple.com
-staging.apple-carry-relay.cloudflare.com
-uschi7.icloud-content.com
+apple-relay.cloudflare.com
+apple-relay.fastly-edge.com
 "
 LOON_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx"
 SHADOWROCKET_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule"
@@ -750,7 +748,7 @@ public_dns_ip_for_domain() {
 }
 
 connected_ip_for_domain() {
-    local domain="$1" proxy rc ip
+    local domain="$1" proxy rc ip attempt
     if [ "$TEST_MODE" = "1" ]; then
         if [ -n "${ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS:-}" ]; then
             /usr/bin/awk -v wanted="$domain" '$1==wanted { print $2; exit }' "$ENABLE_MAC_SIRI_AI_TEST_ROUTE_RESULTS"
@@ -758,15 +756,19 @@ connected_ip_for_domain() {
         return 0
     fi
     proxy="$(system_proxy_url 2>/dev/null || true)"
-    if [ -n "$proxy" ]; then
-        /usr/bin/curl --insecure --silent --show-error --output /dev/null \
-            --connect-timeout 4 --max-time 8 --proxy "$proxy" "https://${domain}/" 2>/dev/null
-        rc=$?
-    else
-        /usr/bin/curl --insecure --silent --show-error --output /dev/null \
-            --connect-timeout 4 --max-time 8 "https://${domain}/" 2>/dev/null
-        rc=$?
-    fi
+    rc=1
+    for attempt in 1 2; do
+        if [ -n "$proxy" ]; then
+            /usr/bin/curl --insecure --silent --show-error --output /dev/null \
+                --connect-timeout 4 --max-time 8 --proxy "$proxy" "https://${domain}/" 2>/dev/null
+            rc=$?
+        else
+            /usr/bin/curl --insecure --silent --show-error --output /dev/null \
+                --connect-timeout 4 --max-time 8 "https://${domain}/" 2>/dev/null
+            rc=$?
+        fi
+        [ "$rc" -ne 0 ] || break
+    done
     [ "$rc" -eq 0 ] || return 1
     ip="$(/usr/bin/dscacheutil -q host -a name "$domain" 2>/dev/null | /usr/bin/awk '/ip_address:/ { print $2; exit }')"
     if [ -z "$ip" ] && command -v /usr/bin/dig >/dev/null 2>&1; then
@@ -799,7 +801,7 @@ is_fake_or_local_ip() {
 audit_siri_routes() {
     local domain ip country proxy proxy_label
     SIRI_ROUTE_LEAK_COUNT=0
-    SIRI_ROUTE_UNKNOWN_COUNT=0
+    SIRI_ROUTE_FAILURE_COUNT=0
     printf '\nSiri AI network endpoints / Siri AI 联网端点:\n'
     proxy="$(system_proxy_url 2>/dev/null || true)"
     if [ -n "$proxy" ]; then proxy_label="$proxy"; else proxy_label="none or TUN / 未检测到或使用 TUN"; fi
@@ -808,11 +810,10 @@ audit_siri_routes() {
         [ -n "$domain" ] || continue
         ip="$(connected_ip_for_domain "$domain")"
         if [ -z "$ip" ]; then
-            SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
+            SIRI_ROUTE_FAILURE_COUNT=$((SIRI_ROUTE_FAILURE_COUNT + 1))
             continue
         fi
         if is_fake_or_local_ip "$ip"; then
-            SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
             continue
         fi
         country="$(country_for_ip "$ip" 2>/dev/null)" || country=""
@@ -820,16 +821,13 @@ audit_siri_routes() {
             CN)
                 SIRI_ROUTE_LEAK_COUNT=$((SIRI_ROUTE_LEAK_COUNT + 1))
                 ;;
-            "")
-                SIRI_ROUTE_UNKNOWN_COUNT=$((SIRI_ROUTE_UNKNOWN_COUNT + 1))
-                ;;
             *) ;;
         esac
     done <<EOF
 $SIRI_ROUTE_DOMAINS
 EOF
 
-    if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
+    if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_FAILURE_COUNT" -gt 0 ]; then
         warn "Siri AI may not be able to access the network normally. / Siri AI 可能无法正常联网。"
         info "If access fails, use the latest routing resource below, or enable global proxy and TUN mode. / 如果无法正常访问，可使用下方最新版分流资源，或将代理切换为全局并开启 TUN 模式。"
         info "Clash (place RULE-SET first / 置顶规则集): $CLASH_RULESET_URL"
@@ -919,7 +917,7 @@ command_diagnose() {
     printf '\nConclusion / 结论:\n'
     if [ "$country_ready" -eq 1 ]; then
         ok "Country-code setup is complete. / 国家码设置已经完成。"
-        if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_UNKNOWN_COUNT" -gt 0 ]; then
+        if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_FAILURE_COUNT" -gt 0 ]; then
             info "Follow the network suggestions above if Siri AI is unavailable. / 如果 Siri AI 仍不可用，请按上方联网建议处理。"
         else
             info "Any remaining problem is outside the country-code setup; check proxy routing, Apple server eligibility, and macOS beta availability. / 剩余问题不属于国家码修改范围，请检查代理分流、Apple 服务端资格和 macOS 测试版功能开放情况。"

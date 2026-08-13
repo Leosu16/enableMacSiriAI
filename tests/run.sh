@@ -99,6 +99,30 @@ test_diagnose_audits_complete_siri_routes() {
     ! assert_contains "$output" "LEAK / 疑似漏代理"
 }
 
+test_diagnose_accepts_connected_tun_endpoints() {
+    new_case
+    local output
+    TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-tun.tsv" output="$(ctl diagnose)" || return 1
+    assert_contains "$output" "No Siri AI domain connected to a China endpoint" || return 1
+    ! assert_contains "$output" "Siri AI may not be able to access the network normally"
+}
+
+test_diagnose_ignores_unknown_endpoint_country() {
+    new_case
+    local output
+    TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-country-unknown.tsv" output="$(ctl diagnose)" || return 1
+    assert_contains "$output" "No Siri AI domain connected to a China endpoint" || return 1
+    ! assert_contains "$output" "Siri AI may not be able to access the network normally"
+}
+
+test_diagnose_reports_unreachable_required_endpoint() {
+    new_case
+    local output
+    TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-unreachable.tsv" output="$(ctl diagnose 2>&1)" || return 1
+    assert_contains "$output" "Siri AI may not be able to access the network normally" || return 1
+    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml"
+}
+
 test_diagnose_reports_leaking_siri_routes() {
     new_case
     ctl set CA >/dev/null || return 1
@@ -307,6 +331,9 @@ run_test test_status_sources
 run_test test_diagnose_is_read_only_and_complete
 run_test test_diagnose_recognizes_completed_setup
 run_test test_diagnose_audits_complete_siri_routes
+run_test test_diagnose_accepts_connected_tun_endpoints
+run_test test_diagnose_ignores_unknown_endpoint_country
+run_test test_diagnose_reports_unreachable_required_endpoint
 run_test test_diagnose_reports_leaking_siri_routes
 run_test test_modules_include_date_and_minimum_system_without_system_or_version
 run_test test_clash_ruleset_is_classical_and_includes_assistantd

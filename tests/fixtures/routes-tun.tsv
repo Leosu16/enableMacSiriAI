@@ -1,0 +1,7 @@
+seed.siri.apple.com 198.18.0.1 FAKE
+ropes.apple.com 198.18.0.2 FAKE
+guzzoni.smoot.apple.com 198.18.0.3 FAKE
+gateway.icloud.com 198.18.0.4 FAKE
+api-siri-prod.apple.com 198.18.0.6 FAKE
+apple-relay.cloudflare.com 198.18.0.7 FAKE
+apple-relay.fastly-edge.com 198.18.0.8 FAKE

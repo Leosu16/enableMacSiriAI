@@ -2,6 +2,5 @@ seed.siri.apple.com 17.1.1.1 US
 ropes.apple.com 17.1.1.2 US
 guzzoni.smoot.apple.com 17.1.1.3 US
 gateway.icloud.com 17.1.1.4 US
-api-siri-prod.apple.com 1.2.3.4 CN
+api-siri-prod.apple.com 17.1.1.6 US
 apple-relay.cloudflare.com 104.16.1.1 CA
-apple-relay.fastly-edge.com 198.18.0.1 FAKE
