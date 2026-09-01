@@ -1,5 +1,5 @@
 # Siri AI for Clash Verge Rev / Mihomo
-# Version 0.2.0 · Updated 2026-08-13 00:42 (UTC+8)
+# Version 0.2.1 · Updated 2026-09-01 11:15 (UTC+8)
 
 payload:
   - PROCESS-NAME,assistantd
@@ -14,6 +14,8 @@ payload:
   - DOMAIN-SUFFIX,gateway.icloud.com
   - DOMAIN,probe.icloud.com
   - DOMAIN,api-siri-prod.apple.com
+  - DOMAIN,gateway.fe2.apple-dns.net
+  - DOMAIN,mask-api.fe2.apple-dns.net
   - DOMAIN-SUFFIX,icloud-content.com
   - DOMAIN-SUFFIX,pcc.apple.com
   - DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com

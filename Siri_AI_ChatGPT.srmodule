@@ -2,7 +2,7 @@
 #!desc=Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；启用前请确认 Shadowrocket 配置包含 PROXY 策略。
 #!homepage=https://github.com/Leosu16/enableMacSiriAI
 #!author=Leosu16
-#!date=2026-08-13 00:42 UTC+8
+#!date=2026-09-01 11:15 UTC+8
 #!system_version=27
 
 [Rule]
@@ -20,6 +20,8 @@ DOMAIN-SUFFIX,apps.mzstatic.com,PROXY
 DOMAIN-SUFFIX,gateway.icloud.com,PROXY
 DOMAIN,probe.icloud.com,PROXY
 DOMAIN,api-siri-prod.apple.com,PROXY
+DOMAIN,gateway.fe2.apple-dns.net,PROXY
+DOMAIN,mask-api.fe2.apple-dns.net,PROXY
 DOMAIN-SUFFIX,icloud-content.com,PROXY
 
 #  Apple Intelligence / Private Cloud Compute

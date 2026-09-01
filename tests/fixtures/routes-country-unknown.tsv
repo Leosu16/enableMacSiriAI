@@ -3,5 +3,7 @@ ropes.apple.com 17.1.1.2 US
 guzzoni.smoot.apple.com 17.1.1.3 US
 gateway.icloud.com 17.1.1.4 US
 api-siri-prod.apple.com 17.1.1.6 US
+gateway.fe2.apple-dns.net 17.1.1.7 US
+mask-api.fe2.apple-dns.net 17.1.1.8 US
 apple-relay.cloudflare.com 104.16.1.1
 apple-relay.fastly-edge.com 151.101.1.1 US
