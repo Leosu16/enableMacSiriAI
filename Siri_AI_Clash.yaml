@@ -14,8 +14,7 @@ payload:
   - DOMAIN-SUFFIX,gateway.icloud.com
   - DOMAIN,probe.icloud.com
   - DOMAIN,api-siri-prod.apple.com
-  - DOMAIN,gateway.fe2.apple-dns.net
-  - DOMAIN,mask-api.fe2.apple-dns.net
+  - DOMAIN-SUFFIX,fe2.apple-dns.net
   - DOMAIN-SUFFIX,icloud-content.com
   - DOMAIN-SUFFIX,pcc.apple.com
   - DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com

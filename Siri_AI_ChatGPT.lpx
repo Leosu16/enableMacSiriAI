@@ -20,8 +20,7 @@ DOMAIN-SUFFIX,apps.mzstatic.com,PROXY
 DOMAIN-SUFFIX,gateway.icloud.com,PROXY
 DOMAIN,probe.icloud.com,PROXY
 DOMAIN,api-siri-prod.apple.com,PROXY
-DOMAIN,gateway.fe2.apple-dns.net,PROXY
-DOMAIN,mask-api.fe2.apple-dns.net,PROXY
+DOMAIN-SUFFIX,fe2.apple-dns.net,PROXY
 DOMAIN-SUFFIX,icloud-content.com,PROXY
 
 #  Apple Intelligence / Private Cloud Compute

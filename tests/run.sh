@@ -158,8 +158,7 @@ test_modules_include_date_and_minimum_system_without_system_or_version() {
         if /usr/bin/grep -Fq 'PROCESS-NAME,assistantd,PROXY' "$module"; then
             return 1
         fi
-        /usr/bin/grep -Fq 'DOMAIN,gateway.fe2.apple-dns.net,PROXY' "$module" || return 1
-        /usr/bin/grep -Fq 'DOMAIN,mask-api.fe2.apple-dns.net,PROXY' "$module" || return 1
+        /usr/bin/grep -Fq 'DOMAIN-SUFFIX,fe2.apple-dns.net,PROXY' "$module" || return 1
     done
 }
 
@@ -168,8 +167,7 @@ test_clash_ruleset_is_classical_and_includes_assistantd() {
     /usr/bin/grep -Fq 'payload:' "$ruleset" || return 1
     /usr/bin/grep -Fq 'PROCESS-NAME,assistantd' "$ruleset" || return 1
     /usr/bin/grep -Fq 'DOMAIN-SUFFIX,pcc.apple.com' "$ruleset" || return 1
-    /usr/bin/grep -Fq 'DOMAIN,gateway.fe2.apple-dns.net' "$ruleset" || return 1
-    /usr/bin/grep -Fq 'DOMAIN,mask-api.fe2.apple-dns.net' "$ruleset" || return 1
+    /usr/bin/grep -Fq 'DOMAIN-SUFFIX,fe2.apple-dns.net' "$ruleset" || return 1
     /usr/bin/grep -Fq 'Version 0.2.1 · Updated 2026-09-01 11:15 (UTC+8)' "$ruleset" || return 1
 }
 
