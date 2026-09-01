@@ -2,7 +2,7 @@
 #!desc = Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；导入后请为 PROXY 映射代理策略。
 #!homepage = https://github.com/Leosu16/enableMacSiriAI
 #!author = Leosu16
-#!date = 2026-09-01 11:15 UTC+8
+#!date = 2026-09-01 11:23 UTC+8
 #!system_version = 27
 
 [Rule]
