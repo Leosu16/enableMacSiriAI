@@ -73,10 +73,13 @@ sudo ./enableMacSiriAI restore
 - [最新版 Loon 插件（`.lpx`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [最新版 Shadowrocket 模块（`.srmodule`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [最新版 Clash/Mihomo 规则集（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
+- [Clash/Mihomo Fake-IP 过滤规则（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
 
 导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址。这些分流配置与国家码修改功能相互独立。
 
 Clash/Mihomo 使用 `behavior: classical` 引用上述链接，并置顶 `RULE-SET`。
+
+使用 Fake-IP 时，将 Fake-IP 过滤规则以 `behavior: domain` 添加为 `Siri-AI-FakeIP-Filter`，并在 `dns.fake-ip-filter` 中加入 `rule-set:Siri-AI-FakeIP-Filter`。
 
 如果 Siri AI 无法正常访问，可使用上述分流资源，或将代理切换为全局并开启 TUN 模式。
 

@@ -1,0 +1,5 @@
+# Siri AI Fake-IP filter for Clash Verge Rev / Mihomo
+# Updated 2026-09-01 11:36 (UTC+8)
+
+payload:
+  - staging.apple-carry-relay.cloudflare.com

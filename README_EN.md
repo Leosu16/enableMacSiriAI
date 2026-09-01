@@ -73,10 +73,13 @@ The repository also includes optional Siri AI and ChatGPT routing resources:
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
+- [Clash/Mihomo Fake-IP filter (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
 
 After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL. These routing configurations are independent of the country-code feature.
 
 For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
+
+When using Fake-IP, add the Fake-IP filter as `Siri-AI-FakeIP-Filter` with `behavior: domain`, then add `rule-set:Siri-AI-FakeIP-Filter` to `dns.fake-ip-filter`.
 
 If Siri AI cannot access the network normally, use one of the routing resources above, or enable global proxy and TUN mode.
 

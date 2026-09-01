@@ -171,6 +171,13 @@ test_clash_ruleset_is_classical_and_includes_assistantd() {
     /usr/bin/grep -Fq 'Version 0.2.1 · Updated 2026-09-01 11:23 (UTC+8)' "$ruleset" || return 1
 }
 
+test_fake_ip_filter_contains_only_staging_relay() {
+    local filter="$ROOT/Siri_AI_FakeIP_Filter.yaml"
+    /usr/bin/grep -Fq 'payload:' "$filter" || return 1
+    [ "$(/usr/bin/awk '/^  - / { count++ } END { print count + 0 }' "$filter")" = "1" ] || return 1
+    /usr/bin/grep -Fq '  - staging.apple-carry-relay.cloudflare.com' "$filter" || return 1
+}
+
 test_precise_set_and_lock() {
     new_case
     ctl set US >/dev/null || return 1
@@ -339,6 +346,7 @@ run_test test_diagnose_reports_unreachable_required_endpoint
 run_test test_diagnose_reports_leaking_siri_routes
 run_test test_modules_include_date_and_minimum_system_without_system_or_version
 run_test test_clash_ruleset_is_classical_and_includes_assistantd
+run_test test_fake_ip_filter_contains_only_staging_relay
 run_test test_precise_set_and_lock
 run_test test_backup_is_first_original
 run_test test_unlock_and_restore
