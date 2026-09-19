@@ -72,6 +72,7 @@ The repository also includes optional Siri AI and ChatGPT routing resources:
 
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
+- [sing-box JSON rule set (`.json`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json): matches the Loon and Shadowrocket domain rules. Assign a proxy policy and place it first after importing.
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - [Clash/Mihomo Fake-IP filter (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
 

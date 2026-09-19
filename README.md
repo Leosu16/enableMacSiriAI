@@ -72,6 +72,7 @@ sudo ./enableMacSiriAI restore
 
 - [最新版 Loon 插件（`.lpx`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [最新版 Shadowrocket 模块（`.srmodule`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
+- [sing-box JSON 规则集（`.json`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json)：与 Loon、Shadowrocket 的域名规则一致，导入后选择代理策略并置顶。
 - [最新版 Clash/Mihomo 规则集（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - [Clash/Mihomo Fake-IP 过滤规则（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
 
