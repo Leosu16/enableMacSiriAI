@@ -81,7 +81,7 @@ sudo ./enableMacSiriAI restore
 
 Clash/Mihomo 使用 `behavior: classical` 引用上述链接，并置顶 `RULE-SET`。
 
-全局分流配置片段适用于 Mihomo 内核客户端，需与节点订阅合并使用，不作为 `RULE-SET` 导入。代理策略使用 `🔥ChatGPT`，其他订阅请替换为自己的策略名。合并 `rule-providers` 并追加 DNS 过滤项；AI 规则置顶，原订阅规则放在中间，ChinaMax 放在 `GEOIP,CN` / `MATCH` 前。保留原 DNS 设置、过滤列表和兜底规则；使用客户端的 YAML 覆写功能时，请确认它支持上述合并顺序。
+全局分流配置片段适用于 Mihomo 内核客户端，需与节点订阅合并使用，不作为 `RULE-SET` 导入。自带 `Siri-ChatGPT` 策略组，自动收集订阅节点；导入后选择合适节点，换订阅无需修改 AI 规则。合并 `proxy-groups` 时保留原策略组，若已有 `Siri-ChatGPT` 则只保留一个同名组。合并 `rule-providers` 并追加 DNS 过滤项；AI 规则置顶，原订阅规则放在中间，ChinaMax 放在 `GEOIP,CN` / `MATCH` 前。保留原 DNS 设置、过滤列表和兜底规则；使用客户端的 YAML 覆写功能时，请确认它支持上述合并顺序。
 
 使用 Fake-IP 时，将 Fake-IP 过滤规则以 `behavior: domain` 添加为 `Siri-AI-FakeIP-Filter`，并在 `dns.fake-ip-filter` 中加入 `rule-set:Siri-AI-FakeIP-Filter`。
 

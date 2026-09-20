@@ -81,7 +81,7 @@ After importing the appropriate file, make sure the client configuration provide
 
 For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
 
-The global routing fragment is for Mihomo-based clients and must be merged with a node subscription, not imported as a `RULE-SET`. It uses the `🔥ChatGPT` policy; replace this name if your subscription uses another policy. Merge `rule-providers` and append the DNS filter entry. Put AI rules first, existing subscription rules next, and ChinaMax before `GEOIP,CN` / `MATCH`. Preserve existing DNS settings, filters, and fallback rules. When using a client's YAML override feature, check that it supports this merge order.
+The global routing fragment is for Mihomo-based clients and must be merged with a node subscription, not imported as a `RULE-SET`. Its built-in `Siri-ChatGPT` group automatically collects subscription nodes. Select a suitable node after importing; changing subscriptions requires no AI rule edits. Preserve existing groups when merging `proxy-groups`; if `Siri-ChatGPT` already exists, keep only one group with that name. Merge `rule-providers` and append the DNS filter entry. Put AI rules first, existing subscription rules next, and ChinaMax before `GEOIP,CN` / `MATCH`. Preserve existing DNS settings, filters, and fallback rules. When using a client's YAML override feature, check that it supports this merge order.
 
 When using Fake-IP, add the Fake-IP filter as `Siri-AI-FakeIP-Filter` with `behavior: domain`, then add `rule-set:Siri-AI-FakeIP-Filter` to `dns.fake-ip-filter`.
 

@@ -2,11 +2,19 @@
 # 全局分流配置片段：Siri AI / ChatGPT / ChinaMax / Fake-IP filter
 # 与现有订阅合并使用；不包含节点，不是 payload 规则集或完整订阅。
 # Merge into an existing subscription; not a payload rule set or a full profile.
-# Requires a proxy policy named 🔥ChatGPT; rename references if needed.
+# 自带 Siri-ChatGPT 策略组，自动收集订阅节点；导入后选择合适节点。
+# Siri-ChatGPT collects subscription nodes automatically; select a suitable node after merging.
+# 合并 proxy-groups 时保留原策略组；若已有 Siri-ChatGPT，保留一个同名组即可。
+# Preserve existing groups when merging; keep only one group named Siri-ChatGPT.
 # 合并 rule-providers；追加 DNS 过滤项，保留原 DNS 配置和过滤列表。
 # Merge rule-providers; append the DNS filter while preserving existing DNS settings.
 # rules 分段合并顺序见下方注释，不要直接覆盖原 rules 列表。
 # Follow the rule insertion comments below; do not replace existing rules wholesale.
+
+proxy-groups:
+  - name: Siri-ChatGPT
+    type: select
+    include-all: true
 
 rule-providers:
   ChatGPT-Voice-IP:
@@ -75,43 +83,43 @@ dns:
 
 rules:
   # 置顶以下 AI 规则 / Place AI rules first
-  - RULE-SET,Siri-AI,🔥ChatGPT
-  - RULE-SET,ChatGPT-Voice-IP,🔥ChatGPT,no-resolve
-  - DOMAIN-SUFFIX,chatgpt.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,openai.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,chat.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,oaistatic.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,oaiusercontent.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,oaistatsig.com,🔥ChatGPT
-  - DOMAIN,ws.chatgpt.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,chatgpt.livekit.cloud,🔥ChatGPT
-  - DOMAIN-SUFFIX,host.livekit.cloud,🔥ChatGPT
-  - DOMAIN-SUFFIX,turn.livekit.cloud,🔥ChatGPT
-  - DOMAIN,cdn.openaimerge.com,🔥ChatGPT
-  - DOMAIN,cdn.workos.com,🔥ChatGPT
-  - DOMAIN,forwarder.workos.com,🔥ChatGPT
-  - DOMAIN,images.workoscdn.com,🔥ChatGPT
-  - DOMAIN,setup.workos.com,🔥ChatGPT
-  - DOMAIN,workos.imgix.net,🔥ChatGPT
-  - DOMAIN,challenges.cloudflare.com,🔥ChatGPT
-  - DOMAIN,humb.apple.com,🔥ChatGPT
-  - DOMAIN,openai-api.arkoselabs.com,🔥ChatGPT
-  - DOMAIN-SUFFIX,client-api.arkoselabs.com,🔥ChatGPT
-  - DOMAIN,chat.openai.com.cdn.cloudflare.net,🔥ChatGPT
-  - DOMAIN-SUFFIX,openai.com.cdn.cloudflare.net,🔥ChatGPT
-  - DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net,🔥ChatGPT
-  - DOMAIN,openaicomproductionae4b.blob.core.windows.net,🔥ChatGPT
-  - DOMAIN-SUFFIX,openaicom.imgix.net,🔥ChatGPT
-  - DOMAIN-KEYWORD,openaicom-api,🔥ChatGPT
-  - DOMAIN,production-openaicom-storage.azureedge.net,🔥ChatGPT
-  - DOMAIN-SUFFIX,openaiapi-site.azureedge.net,🔥ChatGPT
-  - DOMAIN-SUFFIX,ct.sendgrid.net,🔥ChatGPT
-  - DOMAIN-SUFFIX,intercom.io,🔥ChatGPT
-  - DOMAIN-SUFFIX,intercomcdn.com,🔥ChatGPT
-  - DOMAIN,js.stripe.com,🔥ChatGPT
-  - DOMAIN,o207216.ingest.sentry.io,🔥ChatGPT
-  - DOMAIN,o33249.ingest.sentry.io,🔥ChatGPT
-  - DOMAIN,rum.browser-intake-datadoghq.com,🔥ChatGPT
+  - RULE-SET,Siri-AI,Siri-ChatGPT
+  - RULE-SET,ChatGPT-Voice-IP,Siri-ChatGPT,no-resolve
+  - DOMAIN-SUFFIX,chatgpt.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,openai.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,chat.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,oaistatic.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,oaiusercontent.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,oaistatsig.com,Siri-ChatGPT
+  - DOMAIN,ws.chatgpt.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,chatgpt.livekit.cloud,Siri-ChatGPT
+  - DOMAIN-SUFFIX,host.livekit.cloud,Siri-ChatGPT
+  - DOMAIN-SUFFIX,turn.livekit.cloud,Siri-ChatGPT
+  - DOMAIN,cdn.openaimerge.com,Siri-ChatGPT
+  - DOMAIN,cdn.workos.com,Siri-ChatGPT
+  - DOMAIN,forwarder.workos.com,Siri-ChatGPT
+  - DOMAIN,images.workoscdn.com,Siri-ChatGPT
+  - DOMAIN,setup.workos.com,Siri-ChatGPT
+  - DOMAIN,workos.imgix.net,Siri-ChatGPT
+  - DOMAIN,challenges.cloudflare.com,Siri-ChatGPT
+  - DOMAIN,humb.apple.com,Siri-ChatGPT
+  - DOMAIN,openai-api.arkoselabs.com,Siri-ChatGPT
+  - DOMAIN-SUFFIX,client-api.arkoselabs.com,Siri-ChatGPT
+  - DOMAIN,chat.openai.com.cdn.cloudflare.net,Siri-ChatGPT
+  - DOMAIN-SUFFIX,openai.com.cdn.cloudflare.net,Siri-ChatGPT
+  - DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net,Siri-ChatGPT
+  - DOMAIN,openaicomproductionae4b.blob.core.windows.net,Siri-ChatGPT
+  - DOMAIN-SUFFIX,openaicom.imgix.net,Siri-ChatGPT
+  - DOMAIN-KEYWORD,openaicom-api,Siri-ChatGPT
+  - DOMAIN,production-openaicom-storage.azureedge.net,Siri-ChatGPT
+  - DOMAIN-SUFFIX,openaiapi-site.azureedge.net,Siri-ChatGPT
+  - DOMAIN-SUFFIX,ct.sendgrid.net,Siri-ChatGPT
+  - DOMAIN-SUFFIX,intercom.io,Siri-ChatGPT
+  - DOMAIN-SUFFIX,intercomcdn.com,Siri-ChatGPT
+  - DOMAIN,js.stripe.com,Siri-ChatGPT
+  - DOMAIN,o207216.ingest.sentry.io,Siri-ChatGPT
+  - DOMAIN,o33249.ingest.sentry.io,Siri-ChatGPT
+  - DOMAIN,rum.browser-intake-datadoghq.com,Siri-ChatGPT
 
   # 在这里保留原订阅规则（不含 GEOIP,CN 和 MATCH 兜底）
   # Keep existing subscription rules here, before GEOIP,CN and MATCH.
