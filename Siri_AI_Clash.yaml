@@ -1,5 +1,28 @@
 # Siri AI for Clash Verge Rev / Mihomo
 # Version 0.2.1 · Updated 2026-09-01 11:23 (UTC+8)
+# 配套策略组：Siri-ChatGPT；由主配置创建，不依赖订阅的策略组名称。
+# Companion group: Siri-ChatGPT, defined in the main configuration.
+# 完整分流配置片段 / Global routing configuration fragment:
+# https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml
+# 单独引用本规则集时，在主配置中合并以下配置，并置顶 RULE-SET：
+# When using this rule set separately, merge the following into the main config
+# and place RULE-SET first:
+# proxy-groups:
+#   - name: Siri-ChatGPT
+#     type: select
+#     include-all: true
+# rule-providers:
+#   Siri-AI:
+#     type: http
+#     behavior: classical
+#     format: yaml
+#     url: https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml
+#     path: ./ruleset/Leosu16-Siri_AI_Clash.yaml
+#     interval: 86400
+# rules:
+#   - RULE-SET,Siri-AI,Siri-ChatGPT
+# 导入后在 Siri-ChatGPT 中选择节点；已有同名组时合并为一个。
+# Select a node in Siri-ChatGPT after importing; merge any existing same-named group.
 
 payload:
   - PROCESS-NAME,assistantd

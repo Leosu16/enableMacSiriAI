@@ -46,6 +46,8 @@ rule-providers:
     - 72.146.20.246/32
     - 74.248.148.7/32
   Siri-AI:
+    # Siri_AI_Clash.yaml 仅提供匹配规则；下方 RULE-SET 指定 Siri-ChatGPT 策略。
+    # Siri_AI_Clash.yaml supplies matches; RULE-SET below assigns Siri-ChatGPT.
     type: http
     behavior: classical
     format: yaml
