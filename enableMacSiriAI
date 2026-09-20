@@ -27,7 +27,7 @@ apple-relay.fastly-edge.com
 "
 LOON_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx"
 SHADOWROCKET_MODULE_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule"
-CLASH_RULESET_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml"
+CLASH_RULESET_URL="https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml"
 
 TEST_MODE="${ENABLE_MAC_SIRI_AI_TEST_MODE:-0}"
 if [ "$TEST_MODE" = "1" ]; then
@@ -837,7 +837,7 @@ EOF
     if [ "$SIRI_ROUTE_LEAK_COUNT" -gt 0 ] || [ "$SIRI_ROUTE_FAILURE_COUNT" -gt 0 ]; then
         warn "Siri AI may not be able to access the network normally. / Siri AI 可能无法正常联网。"
         info "If access fails, use the latest routing resource below, or enable global proxy and TUN mode. / 如果无法正常访问，可使用下方最新版分流资源，或将代理切换为全局并开启 TUN 模式。"
-        info "Clash (place RULE-SET first / 置顶规则集): $CLASH_RULESET_URL"
+        info "Clash/Mihomo template (fill in your subscription URL, then import locally / 填入自己的订阅链接后导入本地配置): $CLASH_RULESET_URL"
         info "Loon: $LOON_MODULE_URL"
         info "Shadowrocket: $SHADOWROCKET_MODULE_URL"
     else

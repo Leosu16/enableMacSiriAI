@@ -73,17 +73,39 @@ sudo ./enableMacSiriAI restore
 - [最新版 Loon 插件（`.lpx`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [最新版 Shadowrocket 模块（`.srmodule`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [sing-box JSON 规则集（`.json`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json)：与 Loon、Shadowrocket 的域名规则一致，导入后选择代理策略并置顶。
-- [最新版 Clash/Mihomo 规则集（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
-- [Clash/Mihomo Fake-IP 过滤规则（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
-- [Clash/Mihomo 全局分流配置片段（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)：包含 Siri AI、ChatGPT、语音 IP、ChinaMax 国内直连及 Siri Fake-IP 过滤配置。
+- [Clash/Mihomo 完整配置模板（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)
+- [Siri 独立规则集（`.yaml`，已有配置用户）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 
-导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址。这些分流配置与国家码修改功能相互独立。
+Loon 可直接添加上面的 `.lpx` 地址，并为 `PROXY` 映射代理策略；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址，配置中需有 `PROXY` 策略。这些分流配置与国家码修改功能相互独立。
 
-Clash/Mihomo 使用 `behavior: classical` 引用上述链接，并置顶 `RULE-SET`。
+### Clash/Mihomo 完整模板
 
-全局分流配置片段适用于 Mihomo 内核客户端，需与节点订阅合并使用，不作为 `RULE-SET` 导入。自带 `Siri-ChatGPT` 策略组，自动收集订阅节点；导入后选择合适节点，换订阅无需修改 AI 规则。合并 `proxy-groups` 时保留原策略组，若已有 `Siri-ChatGPT` 则只保留一个同名组。合并 `rule-providers` 并追加 DNS 过滤项；AI 规则置顶，原订阅规则放在中间，ChinaMax 放在 `GEOIP,CN` / `MATCH` 前。保留原 DNS 设置、过滤列表和兜底规则；使用客户端的 YAML 覆写功能时，请确认它支持上述合并顺序。
+适用于 Mihomo 内核客户端。模板包含 Siri、ChatGPT、语音 IP、国内直连和 Siri Fake-IP 过滤配置。
 
-使用 Fake-IP 时，将 Fake-IP 过滤规则以 `behavior: domain` 添加为 `Siri-AI-FakeIP-Filter`，并在 `dns.fake-ip-filter` 中加入 `rule-set:Siri-AI-FakeIP-Filter`。
+1. 下载完整模板，用文本编辑器将 `YOUR_CLASH_SUBSCRIPTION_URL` 替换为自己的 **Clash YAML 节点订阅链接**，保留两侧引号。
+2. 保存文件，在客户端选择“导入本地配置”并启用它。
+3. 在 `Siri-ChatGPT` 中选择用于 AI 的节点，在 `Proxy` 中选择其他代理流量使用的节点。
+4. 使用规则模式，并按客户端提示开启 TUN / VPN 接管流量。
+
+模板从订阅获取节点，使用模板自己的分流和 DNS 设置，不继承机场的规则。国内和局域网流量直连，其余流量走 `Proxy`。订阅必须返回包含 `proxies` 的 Clash YAML，不能使用网页地址或 Base64 节点订阅。填写过的文件包含私人订阅链接，请保留在本机。以后更新完整模板时，需要重新填写自己的订阅链接；远程规则集和节点订阅会自动更新。
+
+### 只添加 Siri 独立规则集
+
+已有配置可单独使用 `Siri_AI_Clash.yaml`。将以下内容合并到对应配置段，保留原内容，并把 `RULE-SET` 放在规则列表首位：
+
+```yaml
+rule-providers:
+  Siri-AI:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml
+    path: ./ruleset/Leosu16-Siri_AI_Clash.yaml
+    interval: 86400
+rules:
+  - RULE-SET,Siri-AI,你的代理组名
+```
+
+将 `你的代理组名` 替换为配置中**已存在**的代理组名称，然后在客户端的该组中选择节点。独立规则集不会创建策略组，也不包含 ChatGPT 补充规则或 DNS 设置。使用 Fake-IP 时，还需按 [Siri Fake-IP 过滤文件](Siri_AI_FakeIP_Filter.yaml) 的说明添加过滤；完整模板已配置好。
 
 如果 Siri AI 无法正常访问，可使用上述分流资源，或将代理切换为全局并开启 TUN 模式。
 

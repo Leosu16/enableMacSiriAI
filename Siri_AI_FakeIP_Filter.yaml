@@ -1,5 +1,9 @@
 # Siri AI Fake-IP filter for Clash Verge Rev / Mihomo
 # Updated 2026-09-01 11:36 (UTC+8)
 
+# 单独使用：以 behavior: domain 注册为 Siri-AI-FakeIP-Filter，
+# 并向 dns.fake-ip-filter 追加 rule-set:Siri-AI-FakeIP-Filter（blacklist 模式）。
+# Standalone: register as Siri-AI-FakeIP-Filter with behavior: domain, then append
+# rule-set:Siri-AI-FakeIP-Filter to dns.fake-ip-filter in blacklist mode.
 payload:
   - staging.apple-carry-relay.cloudflare.com

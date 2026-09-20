@@ -73,17 +73,39 @@ The repository also includes optional Siri AI and ChatGPT routing resources:
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
 - [sing-box JSON rule set (`.json`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json): matches the Loon and Shadowrocket domain rules. Assign a proxy policy and place it first after importing.
-- [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
-- [Clash/Mihomo Fake-IP filter (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
-- [Clash/Mihomo global routing fragment (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml): includes Siri AI, ChatGPT, voice IPs, ChinaMax direct routing, and the Siri Fake-IP filter configuration.
+- [Complete Clash/Mihomo configuration template (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)
+- [Standalone Siri rule set (`.yaml`, for existing configurations)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 
-After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL. These routing configurations are independent of the country-code feature.
+In Loon, add the `.lpx` URL and map `PROXY` to a proxy policy. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL; the configuration must provide a `PROXY` policy. These resources are independent of the country-code feature.
 
-For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
+### Complete Clash/Mihomo template
 
-The global routing fragment is for Mihomo-based clients and must be merged with a node subscription, not imported as a `RULE-SET`. Its built-in `Siri-ChatGPT` group automatically collects subscription nodes. Select a suitable node after importing; changing subscriptions requires no AI rule edits. Preserve existing groups when merging `proxy-groups`; if `Siri-ChatGPT` already exists, keep only one group with that name. Merge `rule-providers` and append the DNS filter entry. Put AI rules first, existing subscription rules next, and ChinaMax before `GEOIP,CN` / `MATCH`. Preserve existing DNS settings, filters, and fallback rules. When using a client's YAML override feature, check that it supports this merge order.
+For Mihomo-based clients. Includes Siri, ChatGPT, voice IPs, China direct routing, and the Siri Fake-IP filter.
 
-When using Fake-IP, add the Fake-IP filter as `Siri-AI-FakeIP-Filter` with `behavior: domain`, then add `rule-set:Siri-AI-FakeIP-Filter` to `dns.fake-ip-filter`.
+1. Download the template and replace `YOUR_CLASH_SUBSCRIPTION_URL` with your **Clash YAML node subscription URL** in a text editor, keeping the surrounding quotes.
+2. Save the file, import it as a local configuration in your client, and activate it.
+3. Select an AI node in `Siri-ChatGPT` and a node for other proxied traffic in `Proxy`.
+4. Use rule mode and enable TUN / VPN as prompted by your client to route traffic.
+
+The template fetches subscription nodes but uses its own routing and DNS settings, not the provider's rules. China and local-network traffic go direct; other traffic uses `Proxy`. The subscription must return Clash YAML containing `proxies`, not a web page or a Base64 node subscription. Keep the edited file private because it contains your subscription URL. When downloading an updated template, fill in your URL again; remote rule sets and subscription nodes update automatically.
+
+### Add only the standalone Siri rule set
+
+To use `Siri_AI_Clash.yaml` with an existing configuration, merge these entries into the corresponding sections, preserving existing content, and place the `RULE-SET` first:
+
+```yaml
+rule-providers:
+  Siri-AI:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml
+    path: ./ruleset/Leosu16-Siri_AI_Clash.yaml
+    interval: 86400
+rules:
+  - RULE-SET,Siri-AI,YOUR_PROXY_GROUP
+```
+
+Replace `YOUR_PROXY_GROUP` with a proxy group that **already exists** in your configuration, then select a node in that group. This rule set does not create a group or include the additional ChatGPT rules or DNS settings. If using Fake-IP, also follow the instructions in the [Siri Fake-IP filter file](Siri_AI_FakeIP_Filter.yaml); the complete template already includes them.
 
 If Siri AI cannot access the network normally, use one of the routing resources above, or enable global proxy and TUN mode.
 

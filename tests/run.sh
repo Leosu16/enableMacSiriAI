@@ -120,7 +120,7 @@ test_diagnose_reports_unreachable_required_endpoint() {
     local output
     TEST_ROUTE_RESULTS="$ROOT/tests/fixtures/routes-unreachable.tsv" output="$(ctl diagnose 2>&1)" || return 1
     assert_contains "$output" "Siri AI may not be able to access the network normally" || return 1
-    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml"
+    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml"
 }
 
 test_diagnose_reports_leaking_siri_routes() {
@@ -135,8 +135,8 @@ test_diagnose_reports_leaking_siri_routes() {
     ! assert_contains "$output" "LEAK / 疑似漏代理" || return 1
     assert_contains "$output" "Siri AI may not be able to access the network normally" || return 1
     assert_contains "$output" "enable global proxy and TUN mode" || return 1
-    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml" || return 1
-    assert_contains "$output" "place RULE-SET first" || return 1
+    assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml" || return 1
+    assert_contains "$output" "fill in your subscription URL" || return 1
     assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx" || return 1
     assert_contains "$output" "raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule" || return 1
 }

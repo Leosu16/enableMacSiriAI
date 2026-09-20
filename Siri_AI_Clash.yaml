@@ -2,7 +2,7 @@
 # Version 0.2.1 · Updated 2026-09-01 11:23 (UTC+8)
 # 配套策略组：Siri-ChatGPT；由主配置创建，不依赖订阅的策略组名称。
 # Companion group: Siri-ChatGPT, defined in the main configuration.
-# 完整分流配置片段 / Global routing configuration fragment:
+# 完整配置模板（填写订阅链接后导入）/ Complete template (fill in subscription URL, then import):
 # https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml
 # 单独引用本规则集时，在主配置中合并以下配置，并置顶 RULE-SET：
 # When using this rule set separately, merge the following into the main config

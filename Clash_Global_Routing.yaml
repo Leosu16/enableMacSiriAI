@@ -1,20 +1,49 @@
-# Clash/Mihomo global routing configuration fragment
-# 全局分流配置片段：Siri AI / ChatGPT / ChinaMax / Fake-IP filter
-# 与现有订阅合并使用；不包含节点，不是 payload 规则集或完整订阅。
-# Merge into an existing subscription; not a payload rule set or a full profile.
-# 自带 Siri-ChatGPT 策略组，自动收集订阅节点；导入后选择合适节点。
-# Siri-ChatGPT collects subscription nodes automatically; select a suitable node after merging.
-# 合并 proxy-groups 时保留原策略组；若已有 Siri-ChatGPT，保留一个同名组即可。
-# Preserve existing groups when merging; keep only one group named Siri-ChatGPT.
-# 合并 rule-providers；追加 DNS 过滤项，保留原 DNS 配置和过滤列表。
-# Merge rule-providers; append the DNS filter while preserving existing DNS settings.
-# rules 分段合并顺序见下方注释，不要直接覆盖原 rules 列表。
-# Follow the rule insertion comments below; do not replace existing rules wholesale.
+# Mihomo 完整配置模板 / Complete Mihomo configuration template
+# 1. 将下方 YOUR_CLASH_SUBSCRIPTION_URL 替换为自己的 Clash YAML 节点订阅链接。
+# 1. Replace YOUR_CLASH_SUBSCRIPTION_URL below with your Clash YAML subscription URL.
+# 2. 保存后作为本地配置导入客户端；在 Siri-ChatGPT 和 Proxy 中选择节点。
+# 2. Save and import as a local profile; choose nodes in Siri-ChatGPT and Proxy.
+# 3. 使用规则模式，按客户端提示开启 TUN / VPN 接管流量。
+# 3. Use rule mode and enable TUN / VPN in your client to route traffic.
+# 本模板使用订阅的节点和本文件的分流规则，不继承机场的规则和 DNS 设置。
+# Uses subscription nodes with this template's routing and DNS, not the provider's rules.
+
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: true
+profile:
+  store-selected: true
+
+tun:
+  enable: false
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+
+proxy-providers:
+  Subscription:
+    type: http
+    url: "YOUR_CLASH_SUBSCRIPTION_URL"
+    path: ./proxy_providers/subscription.yaml
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
 
 proxy-groups:
   - name: Siri-ChatGPT
     type: select
-    include-all: true
+    use:
+      - Subscription
+  - name: Proxy
+    type: select
+    use:
+      - Subscription
 
 rule-providers:
   ChatGPT-Voice-IP:
@@ -80,8 +109,28 @@ rule-providers:
     path: "./ruleset/bm7-ChinaMax-IP.yaml"
     interval: 86400
 dns:
+  enable: true
+  listen: 127.0.0.1:1053
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  default-nameserver:
+    - 223.5.5.5
+    - 1.1.1.1
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
   fake-ip-filter:
   - rule-set:Siri-AI-FakeIP-Filter
+  - "*.lan"
+  - "*.local"
+  - "*.arpa"
+  - "time.*.com"
+  - "ntp.*.com"
 
 rules:
   # 置顶以下 AI 规则 / Place AI rules first
@@ -123,14 +172,23 @@ rules:
   - DOMAIN,o33249.ingest.sentry.io,Siri-ChatGPT
   - DOMAIN,rum.browser-intake-datadoghq.com,Siri-ChatGPT
 
-  # 在这里保留原订阅规则（不含 GEOIP,CN 和 MATCH 兜底）
-  # Keep existing subscription rules here, before GEOIP,CN and MATCH.
+  # 局域网直连 / Local networks
+  - DOMAIN-SUFFIX,lan,DIRECT
+  - DOMAIN-SUFFIX,local,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
+  - IP-CIDR6,::1/128,DIRECT,no-resolve
+  - IP-CIDR6,fc00::/7,DIRECT,no-resolve
+  - IP-CIDR6,fe80::/10,DIRECT,no-resolve
 
-  # 国内直连：放在原订阅规则后、GEOIP,CN / MATCH 前
-  # China direct: after subscription rules, before GEOIP,CN / MATCH
+  # 国内直连，其他流量走 Proxy / China direct, other traffic via Proxy
   - RULE-SET,ChinaMax-Classical,DIRECT
   - RULE-SET,ChinaMax-Domain,DIRECT
   - RULE-SET,ChinaMax-IP,DIRECT
 
-  # 在这里保留原配置的 GEOIP,CN 与 MATCH 兜底
-  # Keep the original GEOIP,CN and MATCH fallback rules here.
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
