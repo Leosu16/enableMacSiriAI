@@ -75,10 +75,13 @@ sudo ./enableMacSiriAI restore
 - [sing-box JSON 规则集（`.json`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json)：与 Loon、Shadowrocket 的域名规则一致，导入后选择代理策略并置顶。
 - [最新版 Clash/Mihomo 规则集（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - [Clash/Mihomo Fake-IP 过滤规则（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
+- [Clash/Mihomo 全局分流配置片段（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)：包含 Siri AI、ChatGPT、语音 IP、ChinaMax 国内直连及 Siri Fake-IP 过滤配置。
 
 导入对应客户端后，请确认配置中存在 `PROXY` 策略并让它使用受支持地区的节点。Loon 可直接添加上面的 `.lpx` 地址；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址。这些分流配置与国家码修改功能相互独立。
 
 Clash/Mihomo 使用 `behavior: classical` 引用上述链接，并置顶 `RULE-SET`。
+
+全局分流配置片段适用于 Mihomo 内核客户端，需与节点订阅合并使用，不作为 `RULE-SET` 导入。代理策略使用 `🔥ChatGPT`，其他订阅请替换为自己的策略名。合并 `rule-providers` 并追加 DNS 过滤项；AI 规则置顶，原订阅规则放在中间，ChinaMax 放在 `GEOIP,CN` / `MATCH` 前。保留原 DNS 设置、过滤列表和兜底规则；使用客户端的 YAML 覆写功能时，请确认它支持上述合并顺序。
 
 使用 Fake-IP 时，将 Fake-IP 过滤规则以 `behavior: domain` 添加为 `Siri-AI-FakeIP-Filter`，并在 `dns.fake-ip-filter` 中加入 `rule-set:Siri-AI-FakeIP-Filter`。
 

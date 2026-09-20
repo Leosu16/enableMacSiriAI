@@ -75,10 +75,13 @@ The repository also includes optional Siri AI and ChatGPT routing resources:
 - [sing-box JSON rule set (`.json`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json): matches the Loon and Shadowrocket domain rules. Assign a proxy policy and place it first after importing.
 - [Latest Clash/Mihomo rule set (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 - [Clash/Mihomo Fake-IP filter (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_FakeIP_Filter.yaml)
+- [Clash/Mihomo global routing fragment (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml): includes Siri AI, ChatGPT, voice IPs, ChinaMax direct routing, and the Siri Fake-IP filter configuration.
 
 After importing the appropriate file, make sure the client configuration provides a `PROXY` policy backed by a node in a supported region. Loon can add the `.lpx` URL directly. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL. These routing configurations are independent of the country-code feature.
 
 For Clash/Mihomo, use the link above with `behavior: classical` and place the `RULE-SET` first.
+
+The global routing fragment is for Mihomo-based clients and must be merged with a node subscription, not imported as a `RULE-SET`. It uses the `🔥ChatGPT` policy; replace this name if your subscription uses another policy. Merge `rule-providers` and append the DNS filter entry. Put AI rules first, existing subscription rules next, and ChinaMax before `GEOIP,CN` / `MATCH`. Preserve existing DNS settings, filters, and fallback rules. When using a client's YAML override feature, check that it supports this merge order.
 
 When using Fake-IP, add the Fake-IP filter as `Siri-AI-FakeIP-Filter` with `behavior: domain`, then add `rule-set:Siri-AI-FakeIP-Filter` to `dns.fake-ip-filter`.
 
