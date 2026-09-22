@@ -1,0 +1,104 @@
+# Stash iOS/iPadOS override: import alongside an existing node subscription.
+# 在 Stash 中导入并启用此覆写，置于其他覆写之前，然后选择 Siri-ChatGPT 节点。
+# Arrays are prepended by Stash; existing routing and DNS settings are preserved.
+name: Siri AI & ChatGPT
+desc: |-
+  Siri、Apple Intelligence、PCC 与 ChatGPT 分流；启用后在 Siri-ChatGPT 中选择节点。 / Select a node in Siri-ChatGPT after enabling.
+  版本日期 / Updated: 2026-09-22 11:31 UTC+8
+  最低系统版本 / Minimum OS version: 27
+author: Leosu16
+homepage: https://github.com/Leosu16/enableMacSiriAI
+date: 2026-09-22 11:31 UTC+8
+proxy-groups:
+- name: Siri-ChatGPT
+  type: select
+  include-all: true
+dns:
+  fake-ip-filter:
+  - staging.apple-carry-relay.cloudflare.com
+rules:
+- DOMAIN-SUFFIX,siri.apple.com,Siri-ChatGPT
+- DOMAIN,ropes.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-intelligence.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,ai.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,guzzoni.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,smoot.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,ls.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apps.mzstatic.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,gateway.icloud.com,Siri-ChatGPT
+- DOMAIN,probe.icloud.com,Siri-ChatGPT
+- DOMAIN,api-siri-prod.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,fe2.apple-dns.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,icloud-content.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,pcc.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-carry-relay.cloudflare.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-relay.apple.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-relay.cloudflare.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-relay.fastly-edge.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-relay.mask.apple-dns.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,apple-relay.akamaized.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,cp4.cloudflare.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask-api.icloud.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask-api.fe.apple-dns.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask.icloud.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask.apple-dns.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask-h2.icloud.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,mask-t.apple-dns.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,chatgpt.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,openai.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,chat.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,oaistatic.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,oaiusercontent.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,oaistatsig.com,Siri-ChatGPT
+- DOMAIN,ws.chatgpt.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,chatgpt.livekit.cloud,Siri-ChatGPT
+- DOMAIN-SUFFIX,host.livekit.cloud,Siri-ChatGPT
+- DOMAIN-SUFFIX,turn.livekit.cloud,Siri-ChatGPT
+- DOMAIN,cdn.openaimerge.com,Siri-ChatGPT
+- DOMAIN,cdn.workos.com,Siri-ChatGPT
+- DOMAIN,forwarder.workos.com,Siri-ChatGPT
+- DOMAIN,images.workoscdn.com,Siri-ChatGPT
+- DOMAIN,setup.workos.com,Siri-ChatGPT
+- DOMAIN,workos.imgix.net,Siri-ChatGPT
+- DOMAIN,challenges.cloudflare.com,Siri-ChatGPT
+- DOMAIN,humb.apple.com,Siri-ChatGPT
+- DOMAIN,openai-api.arkoselabs.com,Siri-ChatGPT
+- DOMAIN-SUFFIX,client-api.arkoselabs.com,Siri-ChatGPT
+- DOMAIN,chat.openai.com.cdn.cloudflare.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,openai.com.cdn.cloudflare.net,Siri-ChatGPT
+- DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net,Siri-ChatGPT
+- DOMAIN,openaicomproductionae4b.blob.core.windows.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,openaicom.imgix.net,Siri-ChatGPT
+- DOMAIN-KEYWORD,openaicom-api,Siri-ChatGPT
+- DOMAIN,production-openaicom-storage.azureedge.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,openaiapi-site.azureedge.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,ct.sendgrid.net,Siri-ChatGPT
+- DOMAIN-SUFFIX,intercom.io,Siri-ChatGPT
+- DOMAIN-SUFFIX,intercomcdn.com,Siri-ChatGPT
+- DOMAIN,js.stripe.com,Siri-ChatGPT
+- DOMAIN,o207216.ingest.sentry.io,Siri-ChatGPT
+- DOMAIN,o33249.ingest.sentry.io,Siri-ChatGPT
+- DOMAIN,rum.browser-intake-datadoghq.com,Siri-ChatGPT
+- IP-CIDR,102.37.57.54/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,13.71.25.29/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,135.220.40.201/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,172.203.39.49/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,172.207.173.200/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,172.214.226.198/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,191.233.251.27/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,20.162.96.163/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,20.168.48.117/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,20.184.36.134/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,20.203.144.245/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,20.74.221.21/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,4.151.200.38/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,4.155.146.196/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,4.197.172.116/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,4.217.235.100/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,4.245.198.13/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,40.118.236.137/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,51.4.112.173/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,52.143.181.161/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,68.155.152.41/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,72.146.20.246/32,Siri-ChatGPT,no-resolve
+- IP-CIDR,74.248.148.7/32,Siri-ChatGPT,no-resolve

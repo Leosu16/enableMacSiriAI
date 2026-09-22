@@ -72,11 +72,18 @@ The repository also includes optional Siri AI and ChatGPT routing resources:
 
 - [Latest Loon plugin (`.lpx`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [Latest Shadowrocket module (`.srmodule`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
+- [Stash override (`.stoverride`, iOS/iPadOS)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.stoverride)
 - [sing-box JSON rule set (`.json`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json): matches the Loon and Shadowrocket domain rules. Assign a proxy policy and place it first after importing.
 - [Complete Clash/Mihomo configuration template (`.yaml`)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)
 - [Standalone Siri rule set (`.yaml`, for existing configurations)](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 
 In Loon, add the `.lpx` URL and map `PROXY` to a proxy policy. In Shadowrocket, open Config → Modules → + and paste the `.srmodule` URL; the configuration must provide a `PROXY` policy. These resources are independent of the country-code feature.
+
+### Stash (iOS / iPadOS)
+
+First import and activate your own node subscription in Stash. Import the `.stoverride` link above under Overrides, enable it, and place it before other overrides. Choose a node in the `Siri-ChatGPT` group, use rule mode, and start Stash VPN.
+
+The override collects nodes from the existing configuration, prepends Siri / ChatGPT domain and voice IP rules, and adds the Siri Fake-IP exception. Other subscription rules and DNS settings are preserved. No subscription URL editing or HTTPS interception certificate is required. If a `Siri-ChatGPT` group already exists, keep only one to avoid duplicate definitions. The override alone provides no proxy nodes. Format checks have passed; on-device testing is pending. See [Stash override documentation](https://stash.wiki/en/configuration/override).
 
 ### Complete Clash/Mihomo template
 

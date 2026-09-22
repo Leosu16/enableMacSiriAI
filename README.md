@@ -72,11 +72,18 @@ sudo ./enableMacSiriAI restore
 
 - [最新版 Loon 插件（`.lpx`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.lpx)
 - [最新版 Shadowrocket 模块（`.srmodule`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.srmodule)
+- [Stash 覆写模块（`.stoverride`，iOS/iPadOS）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.stoverride)
 - [sing-box JSON 规则集（`.json`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_ChatGPT.json)：与 Loon、Shadowrocket 的域名规则一致，导入后选择代理策略并置顶。
 - [Clash/Mihomo 完整配置模板（`.yaml`）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Clash_Global_Routing.yaml)
 - [Siri 独立规则集（`.yaml`，已有配置用户）](https://raw.githubusercontent.com/Leosu16/enableMacSiriAI/main/Siri_AI_Clash.yaml)
 
 Loon 可直接添加上面的 `.lpx` 地址，并为 `PROXY` 映射代理策略；Shadowrocket 可在“配置 → 模块 → +”中粘贴 `.srmodule` 地址，配置中需有 `PROXY` 策略。这些分流配置与国家码修改功能相互独立。
+
+### Stash（iOS / iPadOS）
+
+先在 Stash 导入并启用自己的节点订阅，再在“覆写”中通过上面的 `.stoverride` 链接导入并启用模块，将它排在其他覆写之前。在代理页面的 `Siri-ChatGPT` 组中选择节点，使用规则模式并启动 Stash VPN。
+
+模块自动收集原配置的节点，置顶 Siri / ChatGPT 域名和语音 IP 规则，并追加 Siri Fake-IP 例外。原订阅的其他分流和 DNS 设置保留，无需填写订阅链接或安装 HTTPS 解密证书。如果已有同名 `Siri-ChatGPT` 组，请保留一个，避免重复定义。仅导入模块而没有节点订阅时，无法提供代理。格式已校验，移动端实际效果待测试。参见 [Stash 覆写说明](https://stash.wiki/configuration/override)。
 
 ### Clash/Mihomo 完整模板
 
