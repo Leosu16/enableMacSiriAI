@@ -4,11 +4,11 @@
 name: Siri AI & ChatGPT
 desc: |-
   Siri、Apple Intelligence、PCC 与 ChatGPT 分流；启用后在 Siri-ChatGPT 中选择节点。 / Select a node in Siri-ChatGPT after enabling.
-  版本日期 / Updated: 2026-09-22 11:31 UTC+8
+  版本日期 / Updated: 2026-10-19 17:12 UTC+8
   最低系统版本 / Minimum OS version: 27
 author: Leosu16
 homepage: https://github.com/Leosu16/enableMacSiriAI
-date: 2026-09-22 11:31 UTC+8
+date: 2026-10-19 17:12 UTC+8
 proxy-groups:
 - name: Siri-ChatGPT
   type: select
@@ -57,6 +57,7 @@ rules:
 - DOMAIN,cdn.openaimerge.com,Siri-ChatGPT
 - DOMAIN,cdn.workos.com,Siri-ChatGPT
 - DOMAIN,forwarder.workos.com,Siri-ChatGPT
+- DOMAIN,frontend-apps-multi-region.workos.com,Siri-ChatGPT
 - DOMAIN,images.workoscdn.com,Siri-ChatGPT
 - DOMAIN,setup.workos.com,Siri-ChatGPT
 - DOMAIN,workos.imgix.net,Siri-ChatGPT

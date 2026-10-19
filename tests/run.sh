@@ -144,7 +144,7 @@ test_diagnose_reports_leaking_siri_routes() {
 test_modules_include_date_and_minimum_system_without_system_or_version() {
     local module
     for module in "$ROOT/Siri_AI_ChatGPT.lpx" "$ROOT/Siri_AI_ChatGPT.srmodule"; do
-        /usr/bin/grep -Eq '^#!date ?= ?2026-09-01 11:23 UTC\+8$' "$module" || return 1
+        /usr/bin/grep -Eq '^#!date ?= ?[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC\+8$' "$module" || return 1
         /usr/bin/grep -Eq '^#!system_version ?= ?27$' "$module" || return 1
         if /usr/bin/grep -Eq '^#!system ?=' "$module"; then
             return 1
@@ -159,6 +159,13 @@ test_modules_include_date_and_minimum_system_without_system_or_version() {
             return 1
         fi
         /usr/bin/grep -Fq 'DOMAIN-SUFFIX,fe2.apple-dns.net,PROXY' "$module" || return 1
+    done
+}
+
+test_chatgpt_workos_endpoint_in_all_clients() {
+    local resource
+    for resource in Clash_Global_Routing.yaml Siri_AI_ChatGPT.lpx Siri_AI_ChatGPT.srmodule Siri_AI_ChatGPT.stoverride Siri_AI_ChatGPT.json; do
+        /usr/bin/grep -Fq 'frontend-apps-multi-region.workos.com' "$ROOT/$resource" || return 1
     done
 }
 
@@ -345,6 +352,7 @@ run_test test_diagnose_ignores_unknown_endpoint_country
 run_test test_diagnose_reports_unreachable_required_endpoint
 run_test test_diagnose_reports_leaking_siri_routes
 run_test test_modules_include_date_and_minimum_system_without_system_or_version
+run_test test_chatgpt_workos_endpoint_in_all_clients
 run_test test_clash_ruleset_is_classical_and_includes_assistantd
 run_test test_fake_ip_filter_contains_only_staging_relay
 run_test test_precise_set_and_lock

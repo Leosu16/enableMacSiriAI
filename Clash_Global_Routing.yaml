@@ -149,6 +149,7 @@ rules:
   - DOMAIN,cdn.openaimerge.com,Siri-ChatGPT
   - DOMAIN,cdn.workos.com,Siri-ChatGPT
   - DOMAIN,forwarder.workos.com,Siri-ChatGPT
+  - DOMAIN,frontend-apps-multi-region.workos.com,Siri-ChatGPT
   - DOMAIN,images.workoscdn.com,Siri-ChatGPT
   - DOMAIN,setup.workos.com,Siri-ChatGPT
   - DOMAIN,workos.imgix.net,Siri-ChatGPT

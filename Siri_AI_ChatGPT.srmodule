@@ -2,7 +2,7 @@
 #!desc=Siri、Apple Intelligence、Private Cloud Compute 与 ChatGPT/OpenAI 专用分流；启用前请确认 Shadowrocket 配置包含 PROXY 策略。
 #!homepage=https://github.com/Leosu16/enableMacSiriAI
 #!author=Leosu16
-#!date=2026-09-01 11:23 UTC+8
+#!date=2026-10-19 17:12 UTC+8
 #!system_version=27
 
 [Rule]
@@ -67,6 +67,7 @@ DOMAIN-SUFFIX,turn.livekit.cloud,PROXY
 DOMAIN,cdn.openaimerge.com,PROXY
 DOMAIN,cdn.workos.com,PROXY
 DOMAIN,forwarder.workos.com,PROXY
+DOMAIN,frontend-apps-multi-region.workos.com,PROXY
 DOMAIN,images.workoscdn.com,PROXY
 DOMAIN,setup.workos.com,PROXY
 DOMAIN,workos.imgix.net,PROXY
